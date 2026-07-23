@@ -1,0 +1,41 @@
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# PHP
+*.log
+*.cache
+vendor/
+composer.lock
+.phpintel
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+.netbeans/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Uploads (keep structure, ignore files)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Temp
+tmp/
+temp/
