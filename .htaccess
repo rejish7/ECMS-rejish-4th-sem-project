@@ -1,10 +1,8 @@
 RewriteEngine On
 
-# Handle frontend assets
-RewriteCond %{REQUEST_URI} ^/frontend/assets/
-RewriteRule ^frontend/assets/(.*)$ frontend/assets/$1 [L]
-
-# Redirect all other requests to index.php
+# Don't rewrite index.php
+RewriteCond %{REQUEST_URI} !index\.php$
+# Don't rewrite existing files
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
+# Redirect all other requests to index.php
 RewriteRule ^(.*)$ index.php [QSA,L]
