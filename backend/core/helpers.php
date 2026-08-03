@@ -4,7 +4,7 @@ function e($value) {
 }
 
 function asset($path) {
-    return 'frontend/assets/' . ltrim($path, '/');
+    return url('/frontend/assets/' . ltrim($path, '/'));
 }
 
 function url($path = '') {

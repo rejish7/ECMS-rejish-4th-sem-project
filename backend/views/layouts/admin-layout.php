@@ -1,10 +1,15 @@
 <?php
-$assetPath = '/ECMS(rejish)/frontend/assets';
-$sidebarImagePath = $assetPath . '/images/counselors-dashboard';
+$assetPath = $assetPath ?? url('/frontend/assets');
+$sidebarImagePath = $sidebarImagePath ?? $assetPath . '/images/counselors-dashboard';
+$topbarImagePath = $topbarImagePath ?? $assetPath . '/images/user-management';
+$topbarSearchPlaceholder = $topbarSearchPlaceholder ?? 'Search system...';
+$topbarSearchIcon = $topbarSearchIcon ?? 'user-search-icon.svg';
+$topbarNotificationIcon = $topbarNotificationIcon ?? 'top-notification.svg';
+$topbarAvatarImage = $topbarAvatarImage ?? 'admin-avatar.jpg';
 
 $currentPage = $currentPage ?? 'dashboard';
 
-$basePath = '/ECMS(rejish)';
+$basePath = rtrim(url('/'), '/');
 
 $adminSidebarItems = [
     ['label' => 'Dashboard', 'icon' => 'sidebar-dashboard.svg', 'route' => $basePath . '/admin/dashboard', 'id' => 'dashboard'],
@@ -16,10 +21,6 @@ $adminSidebarItems = [
     ['label' => 'Documents', 'icon' => 'sidebar-documents.svg', 'route' => $basePath . '/admin/documents', 'id' => 'documents'],
 ];
 
-function admin_asset_url($base, $file) {
-    return $base . '/' . $file;
-}
-
 $pageTitle = $pageTitle ?? 'Admin Dashboard';
 $pageDescription = $pageDescription ?? '';
 ?>
@@ -28,8 +29,8 @@ $pageDescription = $pageDescription ?? '';
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES); ?> | ECMS Admin</title>
-    <link rel="stylesheet" href="<?php echo htmlspecialchars($assetPath, ENT_QUOTES); ?>/css/app.css">
+    <title><?php echo e($pageTitle); ?> | ECMS Admin</title>
+    <link rel="stylesheet" href="<?php echo e($assetPath . '/css/app.css'); ?>">
 </head>
 <body class="dashboard-page">
     <div class="dashboard-shell">
@@ -42,19 +43,19 @@ $pageDescription = $pageDescription ?? '';
             <nav class="sidebar__nav">
                 <?php foreach ($adminSidebarItems as $item): ?>
                     <?php $isActive = $item['id'] === $currentPage; ?>
-                    <a class="sidebar__link<?php echo $isActive ? ' sidebar__link--active' : ''; ?>" href="<?php echo htmlspecialchars($item['route'], ENT_QUOTES); ?>"<?php echo $isActive ? ' aria-current="page"' : ''; ?>>
+                    <a class="sidebar__link<?php echo $isActive ? ' sidebar__link--active' : ''; ?>" href="<?php echo e($item['route']); ?>"<?php echo $isActive ? ' aria-current="page"' : ''; ?>>
                         <span class="sidebar__icon">
-                            <img src="<?php echo htmlspecialchars(admin_asset_url($sidebarImagePath, $item['icon']), ENT_QUOTES); ?>" alt="">
+                            <img src="<?php echo e($sidebarImagePath . '/' . $item['icon']); ?>" alt="">
                         </span>
-                        <span class="sidebar__label"><?php echo htmlspecialchars($item['label'], ENT_QUOTES); ?></span>
+                        <span class="sidebar__label"><?php echo e($item['label']); ?></span>
                     </a>
                 <?php endforeach; ?>
             </nav>
 
             <div class="sidebar__footer">
-                <a class="sidebar__link" href="<?php echo $basePath; ?>/logout">
+                <a class="sidebar__link" href="<?php echo e($basePath . '/logout'); ?>">
                     <span class="sidebar__icon">
-                        <img src="<?php echo htmlspecialchars(admin_asset_url($sidebarImagePath, 'sidebar-logout.svg'), ENT_QUOTES); ?>" alt="">
+                        <img src="<?php echo e($sidebarImagePath . '/sidebar-logout.svg'); ?>" alt="">
                     </span>
                     <span class="sidebar__label">Logout</span>
                 </a>
@@ -64,18 +65,18 @@ $pageDescription = $pageDescription ?? '';
         <div class="dashboard-main">
             <header class="topbar">
                 <label class="topbar__search topbar__search--wide" aria-label="Search">
-                    <img src="<?php echo htmlspecialchars(admin_asset_url($assetPath . '/images/user-management', 'user-search-icon.svg'), ENT_QUOTES); ?>" alt="">
-                    <input type="search" placeholder="Search system..." aria-label="Search system">
+                    <img src="<?php echo e($topbarImagePath . '/' . $topbarSearchIcon); ?>" alt="">
+                    <input type="search" placeholder="<?php echo e($topbarSearchPlaceholder); ?>" aria-label="Search system">
                 </label>
 
                 <div class="topbar__actions">
                     <button type="button" class="icon-button icon-button--topbar" aria-label="Notifications">
-                        <img src="<?php echo htmlspecialchars(admin_asset_url($assetPath . '/images/user-management', 'top-notification.svg'), ENT_QUOTES); ?>" alt="">
+                        <img src="<?php echo e($topbarImagePath . '/' . $topbarNotificationIcon); ?>" alt="">
                     </button>
 
                     <div class="topbar__profile">
                         <span>Admin User</span>
-                        <img src="<?php echo htmlspecialchars(admin_asset_url($assetPath . '/images/user-management', 'admin-avatar.jpg'), ENT_QUOTES); ?>" alt="Admin User profile picture">
+                        <img src="<?php echo e($topbarImagePath . '/' . $topbarAvatarImage); ?>" alt="Admin User profile picture">
                     </div>
                 </div>
             </header>
@@ -85,7 +86,7 @@ $pageDescription = $pageDescription ?? '';
             </main>
 
             <footer class="dashboard-footer">
-                <p>Version 1.0.0 | Created by Rejish Khanal | For educational purposes only.</p>
+                <p>Version 1.0.0 | Created by Rejish Khanal</p>
             </footer>
         </div>
     </div>

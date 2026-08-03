@@ -1,5 +1,5 @@
 <?php
-$assetPath = 'frontend/assets';
+$assetPath = url('/frontend/assets');
 ?>
 <!doctype html>
 <html lang="en">
@@ -7,7 +7,7 @@ $assetPath = 'frontend/assets';
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>404 - Page Not Found | ECMS</title>
-    <link rel="stylesheet" href="<?php echo htmlspecialchars($assetPath, ENT_QUOTES); ?>/css/app.css">
+    <link rel="stylesheet" href="<?php echo e($assetPath . '/css/app.css'); ?>">
     <style>
         .error-page {
             display: flex;
@@ -51,7 +51,7 @@ $assetPath = 'frontend/assets';
         <div class="error-code">404</div>
         <h1 class="error-title">Page Not Found</h1>
         <p class="error-message">The page you are looking for does not exist or has been moved.</p>
-        <a href="<?php echo htmlspecialchars(url('/'), ENT_QUOTES); ?>" class="error-link">Go to Homepage</a>
+        <a href="<?php echo e(url('/')); ?>" class="error-link">Go to Homepage</a>
     </div>
 </body>
 </html>

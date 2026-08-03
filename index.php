@@ -75,6 +75,26 @@ $router->get('/admin/users', function() {
     require VIEW_PATH . '/admin/user-management.php';
 });
 
+$router->get('/admin/students', function() {
+    require VIEW_PATH . '/admin/students.php';
+});
+
+$router->get('/admin/counselors', function() {
+    require VIEW_PATH . '/admin/counselors.php';
+});
+
+$router->get('/admin/sessions', function() {
+    require VIEW_PATH . '/admin/sessions.php';
+});
+
+$router->get('/admin/appointments', function() {
+    require VIEW_PATH . '/admin/appointments.php';
+});
+
+$router->get('/admin/documents', function() {
+    require VIEW_PATH . '/admin/documents.php';
+});
+
 // TODO: Create these views
 // $router->get('/counselor/dashboard', function() {
 //     require VIEW_PATH . '/counselor/dashboard.php';

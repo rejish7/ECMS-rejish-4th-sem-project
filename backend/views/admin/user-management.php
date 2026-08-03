@@ -70,7 +70,7 @@ $stats = [
     ['label' => 'New This Month', 'value' => '42', 'icon' => 'stats-icon.svg', 'change' => '+8 vs last month', 'changeType' => 'positive'],
 ];
 
-$assetPath = '/ECMS(rejish)/frontend/assets';
+$assetPath = url('/frontend/assets');
 $imagePath = $assetPath . '/images/user-management';
 
 ob_start();
@@ -78,20 +78,20 @@ ob_start();
 <style>
     .um-page { padding: 0; }
     .um-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .um-header-text h2 { margin: 0 0 4px; font-size: 24px; font-weight: 700; color: #0b1c30; }
+    .um-header-text h2 { margin: 0 0 4px; font-size: 32px; font-weight: 700; letter-spacing: -0.64px; line-height: 1.2; color: #0b1c30; }
     .um-header-text p { margin: 0; color: #73777f; font-size: 14px; }
     .um-add-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: #0054cb; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
     .um-add-btn:hover { background: #0044a8; }
     .um-add-btn svg { width: 16px; height: 16px; }
 
     .um-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-    .um-stat-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; }
+    .um-stat-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); border: 1px solid #e5e7eb; }
     .um-stat-label { font-size: 12px; color: #73777f; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 8px; }
     .um-stat-value { font-size: 28px; font-weight: 700; color: #0b1c30; margin-bottom: 4px; }
     .um-stat-change { font-size: 12px; color: #10b981; }
     .um-stat-change--neutral { color: #73777f; }
 
-    .um-filters { background: #fff; border-radius: 12px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; margin-bottom: 24px; display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+    .um-filters { background: #fff; border-radius: 12px; padding: 20px 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); border: 1px solid #e5e7eb; margin-bottom: 24px; display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
     .um-filter-group { display: flex; flex-direction: column; gap: 6px; }
     .um-filter-group--search { flex: 1; min-width: 240px; }
     .um-filter-label { font-size: 12px; font-weight: 500; color: #73777f; }
@@ -106,7 +106,7 @@ ob_start();
     .um-clear-btn { padding: 8px 16px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; color: #6b7280; cursor: pointer; transition: all 0.2s; }
     .um-clear-btn:hover { background: #e5e7eb; color: #374151; }
 
-    .um-table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; overflow: hidden; }
+    .um-table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); border: 1px solid #e5e7eb; overflow: hidden; }
     .um-table-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid #e5e7eb; }
     .um-table-header h3 { margin: 0; font-size: 16px; font-weight: 600; color: #0b1c30; }
     .um-table-header p { margin: 0; font-size: 13px; color: #73777f; }
@@ -146,24 +146,26 @@ ob_start();
 
     .um-joined { color: #9ca3af; font-size: 13px; }
 
-    .um-actions { display: flex; gap: 4px; justify-content: flex-end; opacity: 0; transition: opacity 0.15s; }
-    .um-table tbody tr:hover .um-actions { opacity: 1; }
+    .um-actions { display: flex; gap: 4px; justify-content: flex-end; }
     .um-action-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background: none; cursor: pointer; transition: background 0.15s; }
     .um-action-btn:hover { background: #f3f4f6; }
-    .um-action-btn--edit svg { width: 16px; height: 16px; color: #6b7280; }
-    .um-action-btn--delete svg { width: 16px; height: 16px; color: #ef4444; }
+    .um-action-btn svg { width: 16px; height: 16px; }
+    .um-action-btn--view svg { color: #2563eb; }
+    .um-action-btn--edit svg { color: #6b7280; }
+    .um-action-btn--delete svg { color: #ef4444; }
 
-    .um-pagination { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-top: 1px solid #e5e7eb; }
+    .um-pagination { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; border-top: 1px solid #e5e7eb; }
     .um-pagination-info { font-size: 13px; color: #73777f; }
     .um-pagination-pages { display: flex; gap: 4px; }
     .um-page-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: none; background: none; font-size: 13px; font-weight: 500; color: #6b7280; cursor: pointer; transition: all 0.15s; }
     .um-page-btn:hover { background: #f3f4f6; }
     .um-page-btn--active { background: #0054cb; color: #fff; }
-    .um-page-btn--active:hover { background: #0044a8; }
-    .um-page-nav { display: flex; gap: 8px; }
-    .um-page-nav-btn { padding: 6px 14px; border-radius: 6px; border: 1px solid #e5e7eb; background: #fff; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; transition: all 0.15s; }
-    .um-page-nav-btn:hover { background: #f9fafb; border-color: #d1d5db; }
-    .um-page-nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .um-page-btn--active:hover { background: #004aaf; }
+    .um-page-arrow { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; color: #9ca3af; cursor: pointer; transition: background 0.15s; }
+    .um-page-arrow:hover { background: #f3f4f6; }
+    .um-page-arrow:disabled { opacity: 0.3; cursor: not-allowed; }
+    .um-page-arrow svg { width: 14px; height: 14px; }
+    .um-page-ellipsis { color: #9ca3af; font-size: 14px; padding: 0 4px; }
 
     @media (max-width: 768px) {
         .um-stats { grid-template-columns: repeat(2, 1fr); }
@@ -188,9 +190,9 @@ ob_start();
     <div class="um-stats">
         <?php foreach ($stats as $stat): ?>
             <div class="um-stat-card">
-                <div class="um-stat-label"><?php echo $stat['label']; ?></div>
-                <div class="um-stat-value"><?php echo $stat['value']; ?></div>
-                <div class="um-stat-change <?php echo $stat['changeType'] === 'neutral' ? 'um-stat-change--neutral' : ''; ?>"><?php echo $stat['change']; ?></div>
+                <div class="um-stat-label"><?php echo e($stat['label']); ?></div>
+                <div class="um-stat-value"><?php echo e($stat['value']); ?></div>
+                <div class="um-stat-change <?php echo e($stat['changeType']); ?>-neutral"><?php echo e($stat['change']); ?></div>
             </div>
         <?php endforeach; ?>
     </div>
@@ -243,33 +245,36 @@ ob_start();
                             <td>
                                 <div class="um-user">
                                     <?php if ($user['avatar'] === 'image'): ?>
-                                        <img class="um-user-avatar" src="<?php echo htmlspecialchars($imagePath . '/' . $user['image'], ENT_QUOTES); ?>" alt="<?php echo htmlspecialchars($user['name'], ENT_QUOTES); ?>">
+                                        <img class="um-user-avatar" src="<?php echo e($imagePath . '/' . $user['image']); ?>" alt="<?php echo e($user['name']); ?>">
                                     <?php else: ?>
-                                        <span class="um-user-initials um-user-initials--<?php echo htmlspecialchars(strtolower($user['initials']), ENT_QUOTES); ?>"><?php echo htmlspecialchars($user['initials'], ENT_QUOTES); ?></span>
+                                        <span class="um-user-initials um-user-initials--<?php echo e(strtolower($user['initials'])); ?>"><?php echo e($user['initials']); ?></span>
                                     <?php endif; ?>
                                     <div class="um-user-info">
-                                        <strong><?php echo htmlspecialchars($user['name'], ENT_QUOTES); ?></strong>
-                                        <span><?php echo htmlspecialchars($user['id'], ENT_QUOTES); ?></span>
+                                        <strong><?php echo e($user['name']); ?></strong>
+                                        <span><?php echo e($user['id']); ?></span>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <span class="um-role-badge um-role-badge--<?php echo htmlspecialchars(strtolower($user['role']), ENT_QUOTES); ?>"><?php echo htmlspecialchars($user['role'], ENT_QUOTES); ?></span>
+                                <span class="um-role-badge um-role-badge--<?php echo e(strtolower($user['role'])); ?>"><?php echo e($user['role']); ?></span>
                             </td>
                             <td>
-                                <span class="um-email"><?php echo htmlspecialchars($user['email'], ENT_QUOTES); ?></span>
+                                <span class="um-email"><?php echo e($user['email']); ?></span>
                             </td>
                             <td>
-                                <span class="um-status um-status--<?php echo htmlspecialchars($user['statusTone'], ENT_QUOTES); ?>">
+                                <span class="um-status um-status--<?php echo e($user['statusTone']); ?>">
                                     <span class="um-status-dot"></span>
-                                    <?php echo htmlspecialchars($user['status'], ENT_QUOTES); ?>
+                                    <?php echo e($user['status']); ?>
                                 </span>
                             </td>
                             <td>
-                                <span class="um-joined"><?php echo htmlspecialchars($user['joined'], ENT_QUOTES); ?></span>
+                                <span class="um-joined"><?php echo e($user['joined']); ?></span>
                             </td>
                             <td>
                                 <div class="um-actions">
+                                    <button type="button" class="um-action-btn um-action-btn--view" aria-label="View user">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+                                    </button>
                                     <button type="button" class="um-action-btn um-action-btn--edit" aria-label="Edit user">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
                                     </button>
@@ -284,15 +289,20 @@ ob_start();
             </table>
         </div>
         <div class="um-pagination">
-            <span class="um-pagination-info">Page 1 of 250</span>
+            <span class="um-pagination-info">Showing 1 to 10 of 2500 entries</span>
             <div class="um-pagination-pages">
-                <button type="button" class="um-page-nav-btn" disabled>Previous</button>
+                <button type="button" class="um-page-arrow" disabled>
+                    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3L5 7L9 11"/></svg>
+                </button>
                 <button type="button" class="um-page-btn um-page-btn--active">1</button>
                 <button type="button" class="um-page-btn">2</button>
                 <button type="button" class="um-page-btn">3</button>
                 <button type="button" class="um-page-btn">4</button>
                 <button type="button" class="um-page-btn">5</button>
-                <button type="button" class="um-page-nav-btn">Next</button>
+                <span class="um-page-ellipsis">...</span>
+                <button type="button" class="um-page-arrow">
+                    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3L9 7L5 11"/></svg>
+                </button>
             </div>
         </div>
     </div>
