@@ -31,44 +31,70 @@ $router->get('/', function() {
 });
 
 $router->get('/login', function() {
+    if (isLoggedIn()) {
+        redirectToDashboard();
+    }
     require VIEW_PATH . '/auth/login.php';
 });
 
 $router->post('/login', function() {
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
-    
-    $db = getDB();
-    $stmt = $db->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
-    $stmt->execute([$email, md5($password)]);
-    $user = $stmt->fetch();
-    
-    if ($user) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user'] = $user;
-        
-        switch ($user['role']) {
-            case 'admin':
-                redirect(url('/admin/dashboard'));
-                break;
-            // TODO: Create counselor dashboard view
-            // case 'counselor':
-            //     redirect(url('/counselor/dashboard'));
-            //     break;
-            // TODO: Create student dashboard view
-            // case 'student':
-            //     redirect(url('/student/dashboard'));
-            //     break;
-            default:
-                redirect(url('/admin/dashboard'));
-        }
-    } else {
-        $_SESSION['error'] = 'Invalid email or password';
+    if (!verify_csrf()) {
+        $_SESSION['error'] = 'Invalid session token. Please try again.';
         redirect(url('/login'));
     }
+
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $remember = !empty($_POST['remember']);
+
+    $errors = [];
+    if ($email === '') {
+        $errors[] = 'Email address is required.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Please enter a valid email address.';
+    }
+    if ($password === '') {
+        $errors[] = 'Password is required.';
+    }
+
+    if ($errors) {
+        $_SESSION['error'] = implode(' ', $errors);
+        $_SESSION['old'] = ['email' => $email];
+        redirect(url('/login'));
+    }
+
+    $db = getDB();
+    $stmt = $db->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    if (!$user || !password_verify($password, $user['password'])) {
+        $_SESSION['error'] = 'Invalid email or password.';
+        redirect(url('/login'));
+    }
+
+    if ($user['status'] !== 'active') {
+        $_SESSION['error'] = 'Your account has been deactivated. Please contact an administrator.';
+        redirect(url('/login'));
+    }
+
+    session_regenerate_id(true);
+
+    $authUser = $user;
+    unset($authUser['password']);
+    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['user'] = $authUser;
+    unset($_SESSION['old']);
+
+    if ($remember) {
+        setRememberCookie($user);
+    }
+
+    redirectToDashboard($user['role']);
 });
 
 $router->get('/logout', function() {
+    clearRememberCookie();
     session_destroy();
     redirect(url('/login'));
 });
@@ -78,39 +104,91 @@ $router->get('/register', function() {
 });
 
 $router->post('/register', function() {
+    if (!verify_csrf()) {
+        $_SESSION['error'] = 'Invalid session token. Please try again.';
+        redirect(url('/register'));
+    }
+
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $education_level = $_POST['education_level'] ?? '';
+    $password = $_POST['password'] ?? '';
+    $password_confirmation = $_POST['password_confirmation'] ?? '';
 
-    if (empty($name) || empty($email) || empty($education_level)) {
-        $_SESSION['error'] = 'Please fill in all required fields.';
+    $errors = [];
+    if ($name === '') {
+        $errors[] = 'Please enter your full name.';
+    }
+    if ($email === '') {
+        $errors[] = 'Please enter your email address.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Please enter a valid email address.';
+    }
+    $allowedLevels = ['High School', 'Undergraduate', 'Postgraduate'];
+    if ($education_level === '' || !in_array($education_level, $allowedLevels, true)) {
+        $errors[] = 'Please select a valid education level.';
+    }
+    if ($password === '') {
+        $errors[] = 'Please choose a password.';
+    } elseif (strlen($password) < 6) {
+        $errors[] = 'Password must be at least 6 characters.';
+    } elseif ($password !== $password_confirmation) {
+        $errors[] = 'Password confirmation does not match.';
+    }
+
+    if ($errors) {
+        $_SESSION['error'] = implode(' ', $errors);
+        $_SESSION['old'] = ['name' => $name, 'email' => $email, 'education_level' => $education_level];
         redirect(url('/register'));
     }
 
     $db = getDB();
 
-    $stmt = $db->prepare("SELECT id FROM students WHERE email = ?");
-    $stmt->execute([$email]);
-    if ($stmt->fetch()) {
-        $_SESSION['error'] = 'An account with this email already exists.';
-        redirect(url('/register'));
+    foreach (['students' => 'email', 'users' => 'email'] as $table => $column) {
+        $stmt = $db->prepare("SELECT id FROM {$table} WHERE {$column} = ?");
+        $stmt->execute([$email]);
+        if ($stmt->fetch()) {
+            $_SESSION['error'] = 'An account with this email already exists.';
+            $_SESSION['old'] = ['name' => $name, 'email' => $email, 'education_level' => $education_level];
+            redirect(url('/register'));
+        }
     }
 
     $student_id = 'STU-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
-    $password = md5('password123');
 
-    $stmt = $db->prepare(
+    $db->prepare(
         "INSERT INTO students (student_id, name, email, education_level, status, created_at)
          VALUES (?, ?, ?, ?, 'active', NOW())"
-    );
-    $stmt->execute([$student_id, $name, $email, $education_level]);
+    )->execute([$student_id, $name, $email, $education_level]);
 
+    $db->prepare(
+        "INSERT INTO users (user_id, name, email, password, role, status, created_at)
+         VALUES (?, ?, ?, ?, 'student', 'active', NOW())"
+    )->execute([$student_id, $name, $email, password_hash($password, PASSWORD_DEFAULT)]);
+
+    unset($_SESSION['old']);
     $_SESSION['success'] = 'Account created successfully! Your Student ID is ' . $student_id . '. You can now sign in.';
     redirect(url('/login'));
 });
 
 // Dashboard
 $router->get('/admin/dashboard', ['DashboardController', 'index']);
+
+// Student portal
+$router->get('/student/dashboard', ['StudentController', 'dashboard']);
+$router->get('/student/sessions', ['StudentController', 'sessions']);
+$router->get('/student/documents', ['StudentController', 'documents']);
+$router->post('/student/documents/{id}/submit', ['StudentController', 'submitDocument']);
+$router->get('/student/inquiries', ['StudentController', 'inquiries']);
+$router->post('/student/inquiries/store', ['StudentController', 'storeInquiry']);
+$router->get('/student/profile', ['StudentController', 'profile']);
+$router->post('/student/profile/update', ['StudentController', 'updateProfile']);
+
+// Counselor portal
+$router->get('/counselor/dashboard', ['CounselorController', 'dashboard']);
+$router->get('/counselor/documents', ['CounselorController', 'documents']);
+$router->get('/counselor/documents/assign', ['CounselorController', 'assignCreate']);
+$router->post('/counselor/documents/assign/store', ['CounselorController', 'assignStore']);
 
 // Profile
 $router->get('/admin/profile', ['DashboardController', 'profile']);
@@ -147,9 +225,11 @@ $router->post('/admin/sessions/{id}/delete', ['SessionController', 'destroy']);
 $router->get('/admin/documents', ['DocumentController', 'index']);
 $router->get('/admin/documents/review-queue', ['DocumentController', 'reviewQueue']);
 $router->post('/admin/documents/{id}/review', ['DocumentController', 'review']);
-$router->get('/admin/documents/student/{id}', ['DocumentController', 'studentDocs']);
+$router->get('/admin/documents/student/{student_id}', ['DocumentController', 'studentDocs']);
 $router->get('/admin/documents/create', ['DocumentController', 'create']);
 $router->post('/admin/documents/store', ['DocumentController', 'store']);
+$router->get('/admin/documents/assign', ['DocumentController', 'assignCreate']);
+$router->post('/admin/documents/assign/store', ['DocumentController', 'assignStore']);
 $router->get('/admin/documents/{id}', ['DocumentController', 'show']);
 $router->get('/admin/documents/{id}/edit', ['DocumentController', 'edit']);
 $router->post('/admin/documents/{id}/update', ['DocumentController', 'update']);

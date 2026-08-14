@@ -111,9 +111,10 @@ $assetPath = url('/frontend/assets');
             <?php endif; ?>
 
             <form class="login-form" method="POST" action="<?php echo url('/login'); ?>">
+                <?php echo csrf_field(); ?>
                 <div class="form-group">
                     <label for="email">Email address</label>
-                    <input type="email" id="email" name="email" placeholder="Enter your email" required autofocus>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" value="<?php echo e(old('email')); ?>" required autofocus>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>

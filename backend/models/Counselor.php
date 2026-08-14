@@ -48,6 +48,12 @@ class Counselor {
         return $stmt->fetch();
     }
 
+    public function getByEmail($email) {
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE email = ? LIMIT 1");
+        $stmt->execute([$email]);
+        return $stmt->fetch();
+    }
+
     public function count($filters = []) {
         $sql = "SELECT COUNT(*) FROM {$this->table} WHERE 1=1";
         $params = [];

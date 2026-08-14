@@ -103,7 +103,7 @@ class User {
             $data['user_id'],
             $data['name'],
             $data['email'],
-            md5($data['password']),
+            password_hash($data['password'], PASSWORD_DEFAULT),
             $data['role'],
             $data['status'] ?? 'active'
         ]);
@@ -131,7 +131,7 @@ class User {
             if ($key === 'password') {
                 if (empty($value)) continue;
                 $fields[] = "password = ?";
-                $params[] = md5($value);
+                $params[] = password_hash($value, PASSWORD_DEFAULT);
             } else {
                 $fields[] = "{$key} = ?";
                 $params[] = $value;

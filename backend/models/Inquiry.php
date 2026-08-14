@@ -138,4 +138,24 @@ class Inquiry {
         $stmt->execute([$student_id]);
         return $stmt->fetchAll();
     }
+
+    public function hasInquiryForCountry($student_id, $country) {
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*) FROM {$this->table} WHERE student_id = ? AND country_of_interest = ?"
+        );
+        $stmt->execute([$student_id, $country]);
+        return $stmt->fetchColumn() > 0;
+    }
+
+    public function getByCounselorId($counselor_id) {
+        $stmt = $this->db->prepare(
+            "SELECT i.*, st.name AS student_name, st.student_id AS student_code
+             FROM {$this->table} i
+             LEFT JOIN students st ON i.student_id = st.id
+             WHERE i.counselor_id = ?
+             ORDER BY i.created_at DESC"
+        );
+        $stmt->execute([$counselor_id]);
+        return $stmt->fetchAll();
+    }
 }

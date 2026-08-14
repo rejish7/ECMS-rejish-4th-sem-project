@@ -54,7 +54,10 @@ CREATE TABLE IF NOT EXISTS documents (
     size VARCHAR(20),
     type VARCHAR(20),
     category ENUM('education', 'visa') DEFAULT 'education',
-    status ENUM('pending', 'approved', 'rejected', 'resubmit') DEFAULT 'pending',
+    assigned_by INT,
+    assigned_at TIMESTAMP NULL,
+    submitted_at TIMESTAMP NULL,
+    status ENUM('assigned', 'pending', 'approved', 'rejected', 'resubmit') DEFAULT 'pending',
     reviewed_by INT,
     reviewed_at TIMESTAMP NULL,
     remarks TEXT,
@@ -63,7 +66,8 @@ CREATE TABLE IF NOT EXISTS documents (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE SET NULL,
     FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL,
-    FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
+    FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS inquiries (
@@ -80,9 +84,9 @@ CREATE TABLE IF NOT EXISTS inquiries (
     FOREIGN KEY (counselor_id) REFERENCES counselors(id) ON DELETE SET NULL
 );
 
--- Insert default admin user (password: admin123)
+-- Insert default admin user (password: admin@123) - bcrypt hash via password_hash()
 INSERT INTO users (user_id, name, email, password, role, status) VALUES
-('USR-0001', 'Admin User', 'admin@ecms.edu', MD5('admin123'), 'admin', 'active')
+('USR-0001', 'Admin User', 'admin@ecms.edu', '$2y$10$HeTqyb0rcV2CqjYOsqFUiOas5EGnV9cEYkKvdZ9Vg4HeYp78KBSz.', 'admin', 'active')
 ON DUPLICATE KEY UPDATE id=id;
 
 -- Insert sample counselors
@@ -98,6 +102,18 @@ INSERT INTO students (student_id, name, email, education_level, counselor_id, st
 ('STU-2023-102', 'Maria Rodriguez', 'maria@student.edu', 'High School', 2, 'active'),
 ('STU-2023-145', 'James Duncan', 'james@student.edu', 'Postgraduate', 3, 'active'),
 ('STU-2023-210', 'Chloe Kim', 'chloe@student.edu', 'Undergraduate', 1, 'active')
+ON DUPLICATE KEY UPDATE id=id;
+
+-- Login accounts for seeded students & counselors (email is the same as their profile row).
+-- These live in the users table so they can sign in. Default password: password123
+INSERT INTO users (user_id, name, email, password, role, status) VALUES
+('USR-STU-0001', 'Alex Lawson', 'alex@student.edu', '$2y$10$TCOfUM94l0ZktPfeo9Gtw.rDM1n96MYp36WU86oNHsHtTF7oCXcBW', 'student', 'active'),
+('USR-STU-0002', 'Maria Rodriguez', 'maria@student.edu', '$2y$10$TCOfUM94l0ZktPfeo9Gtw.rDM1n96MYp36WU86oNHsHtTF7oCXcBW', 'student', 'active'),
+('USR-STU-0003', 'James Duncan', 'james@student.edu', '$2y$10$TCOfUM94l0ZktPfeo9Gtw.rDM1n96MYp36WU86oNHsHtTF7oCXcBW', 'student', 'active'),
+('USR-STU-0004', 'Chloe Kim', 'chloe@student.edu', '$2y$10$TCOfUM94l0ZktPfeo9Gtw.rDM1n96MYp36WU86oNHsHtTF7oCXcBW', 'student', 'active'),
+('USR-CNS-0001', 'Sarah Jenkins', 'sarah.j@ecms.edu', '$2y$10$TCOfUM94l0ZktPfeo9Gtw.rDM1n96MYp36WU86oNHsHtTF7oCXcBW', 'counselor', 'active'),
+('USR-CNS-0002', 'Michael Chang', 'm.chang@ecms.edu', '$2y$10$TCOfUM94l0ZktPfeo9Gtw.rDM1n96MYp36WU86oNHsHtTF7oCXcBW', 'counselor', 'active'),
+('USR-CNS-0003', 'Elena Patterson', 'elena.p@ecms.edu', '$2y$10$TCOfUM94l0ZktPfeo9Gtw.rDM1n96MYp36WU86oNHsHtTF7oCXcBW', 'counselor', 'active')
 ON DUPLICATE KEY UPDATE id=id;
 
 -- Insert sample sessions

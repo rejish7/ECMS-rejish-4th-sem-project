@@ -83,10 +83,45 @@ class DocumentController extends Controller {
             $this->redirect(url('/admin/documents/review-queue'));
         }
 
-        $this->documentModel->review($id, $remarks, $_SESSION['user_id'] ?? 1, $status);
+        $this->documentModel->review($id, $status, $remarks, $_SESSION['user_id'] ?? 1);
 
         flash('success', 'Document review submitted successfully.');
         $this->redirect(url('/admin/documents/review-queue'));
+    }
+
+    public function assignCreate() {
+        $students = $this->studentModel->getAll();
+
+        $this->view('admin/documents/assign', [
+            'pageTitle' => 'Assign Required Document',
+            'pageDescription' => 'Require a document from a student.',
+            'currentPage' => 'documents',
+            'students' => $students,
+            'preselectedStudent' => (int)($_GET['student_id'] ?? 0),
+        ]);
+    }
+
+    public function assignStore() {
+        if (!$this->isPost()) {
+            $this->redirect(url('/admin/documents'));
+        }
+
+        $data = $this->sanitize($this->getInput());
+
+        if (empty($data['student_id']) || empty($data['name']) || !in_array($data['category'], ['education', 'visa'], true)) {
+            flash('error', 'Please select a student, a document name, and a category.');
+            $this->redirect(url('/admin/documents/assign'));
+        }
+
+        $this->documentModel->assign([
+            'student_id' => $data['student_id'],
+            'name' => $data['name'],
+            'category' => $data['category'],
+            'assigned_by' => $_SESSION['user_id'] ?? null,
+        ]);
+
+        flash('success', 'Required document assigned to the student.');
+        $this->redirect(url('/admin/documents/student/' . $data['student_id']));
     }
 
     public function create() {
@@ -115,8 +150,9 @@ class DocumentController extends Controller {
         if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
             $uploadDir = BASE_PATH . '/uploads/documents/';
             if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
+                mkdir($uploadDir, 0777, true);
             }
+            chmod($uploadDir, 0777);
 
             $fileName = time() . '_' . basename($_FILES['file']['name']);
             $filePath = $uploadDir . $fileName;

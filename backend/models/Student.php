@@ -48,6 +48,12 @@ class Student {
         return $stmt->fetch();
     }
 
+    public function getByEmail($email) {
+        $stmt = $this->db->prepare("SELECT s.*, c.name AS counselor_name FROM {$this->table} s LEFT JOIN counselors c ON s.counselor_id = c.id WHERE s.email = ? LIMIT 1");
+        $stmt->execute([$email]);
+        return $stmt->fetch();
+    }
+
     public function count($filters = []) {
         $sql = "SELECT COUNT(*) FROM {$this->table} WHERE 1=1";
         $params = [];

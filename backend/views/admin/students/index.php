@@ -141,10 +141,10 @@ ob_start();
             <div class="students-pagination__info">Showing <?php echo count($students); ?> of <?php echo e($total); ?> entries</div>
             <div class="students-pagination__controls">
                 <?php
-                $currentPage = (int)($filters['page'] ?? 1);
+                $paginationPage = (int)($filters['page'] ?? 1);
                 $totalPages = max(1, ceil($total / 10));
                 for ($i = 1; $i <= min($totalPages, 5); $i++): ?>
-                    <a href="?page=<?php echo $i; ?>&level=<?php echo e($filters['level'] ?? ''); ?>" class="students-pagination__page <?php echo $i === $currentPage ? 'students-pagination__page--active' : ''; ?>"><?php echo $i; ?></a>
+                    <a href="?page=<?php echo $i; ?>&level=<?php echo e($filters['level'] ?? ''); ?>" class="students-pagination__page <?php echo $i === $paginationPage ? 'students-pagination__page--active' : ''; ?>"><?php echo $i; ?></a>
                 <?php endfor; ?>
             </div>
         </div>

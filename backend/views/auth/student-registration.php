@@ -92,7 +92,7 @@
                     <line x1="22" y1="11" x2="16" y2="11"/>
                 </svg>
             </div>
-            <h1>Join ECMS Pro</h1>
+            <h1>Join ECMS </h1>
             <p>Set up your student profile to start your journey.</p>
         </div>
 
@@ -123,21 +123,38 @@
             <?php endif; ?>
 
             <form method="POST" action="<?php echo url('/register'); ?>">
+                <?php echo csrf_field(); ?>
                 <div class="form-body">
                     <!-- Personal Details -->
                     <div class="form-section">
                         <h3>Personal Details</h3>
                         <div class="form-row">
                             <div class="form-group">
-                                <input type="text" name="name" placeholder="Full Name" required>
+                                <input type="text" name="name" placeholder="Full Name" value="<?php echo e(old('name')); ?>" required>
                             </div>
                             <div class="form-group">
-                                <input type="email" name="email" placeholder="Email Address" required>
+                                <input type="email" name="email" placeholder="Email Address" value="<?php echo e(old('email')); ?>" required>
                             </div>
                         </div>
                         <div class="form-group">
                             <input type="text" name="phone" placeholder="Phone Number">
                         </div>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <!-- Login Credentials -->
+                    <div class="form-section">
+                        <h3>Login Credentials</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="password" name="password" placeholder="Create a password (min 6 characters)" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" name="password_confirmation" placeholder="Confirm password" required>
+                            </div>
+                        </div>
+                        <p style="font-size:12px;color:#9ca3af;margin-top:8px;">You will use your email and this password to sign in.</p>
                     </div>
 
                     <hr class="section-divider">
@@ -164,9 +181,9 @@
                                 <div class="select-wrap">
                                     <select name="education_level" required>
                                         <option value="" disabled selected></option>
-                                        <option value="High School">High School</option>
-                                        <option value="Undergraduate">Undergraduate</option>
-                                        <option value="Postgraduate">Postgraduate</option>
+                                        <option value="High School" <?php echo old('education_level') === 'High School' ? 'selected' : ''; ?>>High School</option>
+                                        <option value="Undergraduate" <?php echo old('education_level') === 'Undergraduate' ? 'selected' : ''; ?>>Undergraduate</option>
+                                        <option value="Postgraduate" <?php echo old('education_level') === 'Postgraduate' ? 'selected' : ''; ?>>Postgraduate</option>
                                     </select>
                                 </div>
                             </div>

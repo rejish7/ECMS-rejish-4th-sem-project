@@ -15,6 +15,7 @@
     .doc-badge { display: inline-flex; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; }
     .doc-badge--education { background: #dbeafe; color: #1d4ed8; }
     .doc-badge--visa { background: #fef3c7; color: #d97706; }
+    .doc-badge--assigned { background: #e0e7ff; color: #4338ca; }
     .doc-badge--pending { background: #fef3c7; color: #d97706; }
     .doc-badge--approved { background: #d1fae5; color: #059669; }
     .doc-badge--rejected { background: #fee2e2; color: #dc2626; }
@@ -22,6 +23,8 @@
     .doc-empty { text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 14px; }
     .btn-secondary { display: inline-flex; align-items: center; height: 36px; padding: 0 16px; border-radius: 8px; background: #fff; color: #43474f; border: 1px solid #e5e7eb; font-size: 13px; font-weight: 500; text-decoration: none; }
     .btn-secondary:hover { background: #f9fafb; }
+    .btn-primary { display: inline-flex; align-items: center; height: 36px; padding: 0 16px; border-radius: 8px; background: #0054cb; color: #fff; border: none; font-size: 13px; font-weight: 500; text-decoration: none; }
+    .btn-primary:hover { background: #004aaf; }
 </style>
 <div class="student-docs-page">
     <section class="student-info">
@@ -36,7 +39,10 @@
     <section class="doc-section">
         <div class="doc-section__header">
             <span class="doc-section__title">All Documents (<?php echo count($documents); ?>)</span>
-            <a href="<?php echo url('/admin/documents/create'); ?>" class="btn-secondary">+ Upload New</a>
+            <div style="display:flex;gap:8px;">
+                <a href="<?php echo url('/admin/documents/assign?student_id=' . $student['id']); ?>" class="btn-primary">+ Assign Required</a>
+                <a href="<?php echo url('/admin/documents/create'); ?>" class="btn-secondary">+ Upload New</a>
+            </div>
         </div>
         <?php if (!empty($documents)): ?>
             <table class="doc-table">

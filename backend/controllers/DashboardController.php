@@ -61,7 +61,7 @@ class DashboardController extends Controller {
         if (!empty($password)) {
             $db = getDB();
             $stmt = $db->prepare("UPDATE users SET password = ? WHERE id = ?");
-            $stmt->execute([md5($password), $_SESSION['user_id']]);
+            $stmt->execute([password_hash($password, PASSWORD_DEFAULT), $_SESSION['user_id']]);
             flash('success', 'Password updated successfully.');
         } else {
             flash('error', 'Please enter a new password.');

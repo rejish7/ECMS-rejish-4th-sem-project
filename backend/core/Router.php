@@ -38,6 +38,40 @@ class Router {
         
         $uri = rtrim($uri, '/') ?: '/';
 
+        // Protect authenticated areas (admin/counselor/student dashboards)
+        if (preg_match('#^/(admin|counselor|student)(/|$)#', $uri)) {
+            if (!isLoggedIn()) {
+                redirect(url('/login'));
+            }
+        }
+
+        // Admin area requires the admin role
+        if (preg_match('#^/admin(/|$)#', $uri)) {
+            $user = getUser();
+            if (!$user || $user['role'] !== 'admin') {
+                $_SESSION['error'] = 'You do not have permission to access that page.';
+                redirect(url('/login'));
+            }
+        }
+
+        // Counselor area requires the counselor role
+        if (preg_match('#^/counselor(/|$)#', $uri)) {
+            $user = getUser();
+            if (!$user || $user['role'] !== 'counselor') {
+                $_SESSION['error'] = 'You do not have permission to access that page.';
+                redirect(url('/login'));
+            }
+        }
+
+        // Student area requires the student role
+        if (preg_match('#^/student(/|$)#', $uri)) {
+            $user = getUser();
+            if (!$user || $user['role'] !== 'student') {
+                $_SESSION['error'] = 'You do not have permission to access that page.';
+                redirect(url('/login'));
+            }
+        }
+
         // Debug
         error_log("REQUEST_URI: {$_SERVER['REQUEST_URI']}");
         error_log("SCRIPT_NAME: {$scriptName}");

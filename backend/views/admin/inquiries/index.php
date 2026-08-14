@@ -73,8 +73,7 @@
 
     @media (max-width: 768px) {
         .inq-stats { grid-template-columns: repeat(2, 1fr); }
-    }
-</style>
+    }</style>
 
 <div class="inq-page">
     <section class="inq-header">

@@ -58,6 +58,32 @@ class Session {
         return $stmt->fetch();
     }
 
+    public function getByStudentId($studentId) {
+        $stmt = $this->db->prepare(
+            "SELECT s.*, st.name AS student_name, c.name AS counselor_name
+             FROM {$this->table} s
+             LEFT JOIN students st ON s.student_id = st.id
+             LEFT JOIN counselors c ON s.counselor_id = c.id
+             WHERE s.student_id = ?
+             ORDER BY s.datetime DESC"
+        );
+        $stmt->execute([$studentId]);
+        return $stmt->fetchAll();
+    }
+
+    public function getByCounselorId($counselorId) {
+        $stmt = $this->db->prepare(
+            "SELECT s.*, st.name AS student_name, c.name AS counselor_name
+             FROM {$this->table} s
+             LEFT JOIN students st ON s.student_id = st.id
+             LEFT JOIN counselors c ON s.counselor_id = c.id
+             WHERE s.counselor_id = ?
+             ORDER BY s.datetime DESC"
+        );
+        $stmt->execute([$counselorId]);
+        return $stmt->fetchAll();
+    }
+
     public function count($filters = []) {
         $sql = "SELECT COUNT(*) FROM {$this->table} WHERE 1=1";
         $params = [];
