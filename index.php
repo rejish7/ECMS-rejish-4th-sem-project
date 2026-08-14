@@ -14,6 +14,16 @@ require_once BACKEND_PATH . '/core/Controller.php';
 require_once BACKEND_PATH . '/core/helpers.php';
 require_once BACKEND_PATH . '/config/database.php';
 
+// Load controllers
+require_once CONTROLLER_PATH . '/DashboardController.php';
+require_once CONTROLLER_PATH . '/StudentController.php';
+require_once CONTROLLER_PATH . '/CounselorController.php';
+require_once CONTROLLER_PATH . '/SessionController.php';
+require_once CONTROLLER_PATH . '/DocumentController.php';
+require_once CONTROLLER_PATH . '/UserController.php';
+require_once CONTROLLER_PATH . '/InquiryController.php';
+require_once CONTROLLER_PATH . '/CatalogController.php';
+
 $router = new Router();
 
 $router->get('/', function() {
@@ -67,42 +77,112 @@ $router->get('/register', function() {
     require VIEW_PATH . '/auth/student-registration.php';
 });
 
-$router->get('/admin/dashboard', function() {
-    require VIEW_PATH . '/admin/dashboard.php';
+$router->post('/register', function() {
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $education_level = $_POST['education_level'] ?? '';
+
+    if (empty($name) || empty($email) || empty($education_level)) {
+        $_SESSION['error'] = 'Please fill in all required fields.';
+        redirect(url('/register'));
+    }
+
+    $db = getDB();
+
+    $stmt = $db->prepare("SELECT id FROM students WHERE email = ?");
+    $stmt->execute([$email]);
+    if ($stmt->fetch()) {
+        $_SESSION['error'] = 'An account with this email already exists.';
+        redirect(url('/register'));
+    }
+
+    $student_id = 'STU-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+    $password = md5('password123');
+
+    $stmt = $db->prepare(
+        "INSERT INTO students (student_id, name, email, education_level, status, created_at)
+         VALUES (?, ?, ?, ?, 'active', NOW())"
+    );
+    $stmt->execute([$student_id, $name, $email, $education_level]);
+
+    $_SESSION['success'] = 'Account created successfully! Your Student ID is ' . $student_id . '. You can now sign in.';
+    redirect(url('/login'));
 });
 
-$router->get('/admin/users', function() {
-    require VIEW_PATH . '/admin/user-management.php';
-});
+// Dashboard
+$router->get('/admin/dashboard', ['DashboardController', 'index']);
 
-$router->get('/admin/students', function() {
-    require VIEW_PATH . '/admin/students.php';
-});
+// Profile
+$router->get('/admin/profile', ['DashboardController', 'profile']);
+$router->post('/admin/profile/update', ['DashboardController', 'updateProfile']);
 
-$router->get('/admin/counselors', function() {
-    require VIEW_PATH . '/admin/counselors.php';
-});
+// Students CRUD
+$router->get('/admin/students', ['StudentController', 'index']);
+$router->get('/admin/students/create', ['StudentController', 'create']);
+$router->post('/admin/students/store', ['StudentController', 'store']);
+$router->get('/admin/students/{id}', ['StudentController', 'show']);
+$router->get('/admin/students/{id}/edit', ['StudentController', 'edit']);
+$router->post('/admin/students/{id}/update', ['StudentController', 'update']);
+$router->post('/admin/students/{id}/delete', ['StudentController', 'destroy']);
 
-$router->get('/admin/sessions', function() {
-    require VIEW_PATH . '/admin/sessions.php';
-});
+// Counselors CRUD
+$router->get('/admin/counselors', ['CounselorController', 'index']);
+$router->get('/admin/counselors/create', ['CounselorController', 'create']);
+$router->post('/admin/counselors/store', ['CounselorController', 'store']);
+$router->get('/admin/counselors/{id}', ['CounselorController', 'show']);
+$router->get('/admin/counselors/{id}/edit', ['CounselorController', 'edit']);
+$router->post('/admin/counselors/{id}/update', ['CounselorController', 'update']);
+$router->post('/admin/counselors/{id}/delete', ['CounselorController', 'destroy']);
 
-$router->get('/admin/appointments', function() {
-    require VIEW_PATH . '/admin/appointments.php';
-});
+// Sessions CRUD
+$router->get('/admin/sessions', ['SessionController', 'index']);
+$router->get('/admin/sessions/create', ['SessionController', 'create']);
+$router->post('/admin/sessions/store', ['SessionController', 'store']);
+$router->get('/admin/sessions/{id}', ['SessionController', 'show']);
+$router->get('/admin/sessions/{id}/edit', ['SessionController', 'edit']);
+$router->post('/admin/sessions/{id}/update', ['SessionController', 'update']);
+$router->post('/admin/sessions/{id}/delete', ['SessionController', 'destroy']);
 
-$router->get('/admin/documents', function() {
-    require VIEW_PATH . '/admin/documents.php';
-});
+// Documents
+$router->get('/admin/documents', ['DocumentController', 'index']);
+$router->get('/admin/documents/review-queue', ['DocumentController', 'reviewQueue']);
+$router->post('/admin/documents/{id}/review', ['DocumentController', 'review']);
+$router->get('/admin/documents/student/{id}', ['DocumentController', 'studentDocs']);
+$router->get('/admin/documents/create', ['DocumentController', 'create']);
+$router->post('/admin/documents/store', ['DocumentController', 'store']);
+$router->get('/admin/documents/{id}', ['DocumentController', 'show']);
+$router->get('/admin/documents/{id}/edit', ['DocumentController', 'edit']);
+$router->post('/admin/documents/{id}/update', ['DocumentController', 'update']);
+$router->post('/admin/documents/{id}/delete', ['DocumentController', 'destroy']);
 
-// TODO: Create these views
-// $router->get('/counselor/dashboard', function() {
-//     require VIEW_PATH . '/counselor/dashboard.php';
-// });
+// Inquiries
+$router->get('/admin/inquiries', ['InquiryController', 'index']);
+$router->get('/admin/inquiries/{id}', ['InquiryController', 'show']);
+$router->post('/admin/inquiries/{id}/assign', ['InquiryController', 'assign']);
+$router->post('/admin/inquiries/{id}/auto-assign', ['InquiryController', 'autoAssign']);
+$router->post('/admin/inquiries/{id}/delete', ['InquiryController', 'destroy']);
 
-// $router->get('/student/dashboard', function() {
-//     require VIEW_PATH . '/student/dashboard.php';
-// });
+// College & Course Catalog
+$router->get('/admin/catalog', ['CatalogController', 'index']);
+$router->get('/admin/catalog/college/create', ['CatalogController', 'collegeCreate']);
+$router->post('/admin/catalog/college/store', ['CatalogController', 'collegeStore']);
+$router->get('/admin/catalog/college/{id}/edit', ['CatalogController', 'collegeEdit']);
+$router->post('/admin/catalog/college/{id}/update', ['CatalogController', 'collegeUpdate']);
+$router->post('/admin/catalog/college/{id}/delete', ['CatalogController', 'collegeDelete']);
+$router->get('/admin/catalog/course/create', ['CatalogController', 'courseCreate']);
+$router->post('/admin/catalog/course/store', ['CatalogController', 'courseStore']);
+$router->get('/admin/catalog/course/{id}/edit', ['CatalogController', 'courseEdit']);
+$router->post('/admin/catalog/course/{id}/update', ['CatalogController', 'courseUpdate']);
+$router->post('/admin/catalog/course/{id}/delete', ['CatalogController', 'courseDelete']);
+
+// Users CRUD
+$router->get('/admin/users', ['UserController', 'index']);
+$router->get('/admin/users/create', ['UserController', 'create']);
+$router->post('/admin/users/store', ['UserController', 'store']);
+$router->get('/admin/users/{id}', ['UserController', 'show']);
+$router->get('/admin/users/{id}/edit', ['UserController', 'edit']);
+$router->post('/admin/users/{id}/update', ['UserController', 'update']);
+$router->post('/admin/users/{id}/delete', ['UserController', 'destroy']);
 
 $router->notFound(function() {
     http_response_code(404);

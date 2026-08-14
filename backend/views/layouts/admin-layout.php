@@ -16,9 +16,10 @@ $adminSidebarItems = [
     ['label' => 'User Management', 'icon' => 'sidebar-users.svg', 'route' => $basePath . '/admin/users', 'id' => 'users'],
     ['label' => 'Students', 'icon' => 'sidebar-students.svg', 'route' => $basePath . '/admin/students', 'id' => 'students'],
     ['label' => 'Counselors', 'icon' => 'sidebar-counselors.svg', 'route' => $basePath . '/admin/counselors', 'id' => 'counselors'],
+    ['label' => 'Inquiries', 'icon' => 'sidebar-sessions.svg', 'route' => $basePath . '/admin/inquiries', 'id' => 'inquiries'],
     ['label' => 'Counseling Sessions', 'icon' => 'sidebar-sessions.svg', 'route' => $basePath . '/admin/sessions', 'id' => 'sessions'],
-    ['label' => 'Appointments', 'icon' => 'sidebar-appointments.svg', 'route' => $basePath . '/admin/appointments', 'id' => 'appointments'],
     ['label' => 'Documents', 'icon' => 'sidebar-documents.svg', 'route' => $basePath . '/admin/documents', 'id' => 'documents'],
+    ['label' => 'College & Course Catalog', 'icon' => 'sidebar-counselors.svg', 'route' => $basePath . '/admin/catalog', 'id' => 'catalog'],
 ];
 
 $pageTitle = $pageTitle ?? 'Admin Dashboard';
@@ -74,14 +75,22 @@ $pageDescription = $pageDescription ?? '';
                         <img src="<?php echo e($topbarImagePath . '/' . $topbarNotificationIcon); ?>" alt="">
                     </button>
 
-                    <div class="topbar__profile">
-                        <span>Admin User</span>
+                    <a href="<?php echo url('/admin/profile'); ?>" class="topbar__profile" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px;cursor:pointer;">
+                        <span><?php echo e($_SESSION['user']['name'] ?? 'Admin User'); ?></span>
                         <img src="<?php echo e($topbarImagePath . '/' . $topbarAvatarImage); ?>" alt="Admin User profile picture">
-                    </div>
+                    </a>
                 </div>
             </header>
 
             <main class="dashboard-content">
+                <?php if (isset($_SESSION['flash'])): ?>
+                    <?php foreach ($_SESSION['flash'] as $type => $message): ?>
+                        <div style="padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:14px;font-weight:500;<?php echo $type === 'error' ? 'background:#fef2f2;color:#dc2626;border:1px solid #fecaca;' : 'background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;'; ?>">
+                            <?php echo e($message); ?>
+                        </div>
+                    <?php endforeach; ?>
+                    <?php unset($_SESSION['flash']); ?>
+                <?php endif; ?>
                 <?php echo $content; ?>
             </main>
 
