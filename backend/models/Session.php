@@ -60,7 +60,7 @@ class Session {
 
     public function getByStudentId($studentId) {
         $stmt = $this->db->prepare(
-            "SELECT s.*, st.name AS student_name, c.name AS counselor_name
+            "SELECT s.*, st.name AS student_name, st.student_id AS student_code, c.name AS counselor_name
              FROM {$this->table} s
              LEFT JOIN students st ON s.student_id = st.id
              LEFT JOIN counselors c ON s.counselor_id = c.id
@@ -73,7 +73,7 @@ class Session {
 
     public function getByCounselorId($counselorId) {
         $stmt = $this->db->prepare(
-            "SELECT s.*, st.name AS student_name, c.name AS counselor_name
+            "SELECT s.*, st.name AS student_name, st.student_id AS student_code, c.name AS counselor_name
              FROM {$this->table} s
              LEFT JOIN students st ON s.student_id = st.id
              LEFT JOIN counselors c ON s.counselor_id = c.id
@@ -85,12 +85,25 @@ class Session {
     }
 
     public function count($filters = []) {
-        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE 1=1";
+        $sql = "SELECT COUNT(*) FROM {$this->table} s LEFT JOIN students st ON s.student_id = st.id LEFT JOIN counselors c ON s.counselor_id = c.id WHERE 1=1";
         $params = [];
 
+        if (!empty($filters['search'])) {
+            $sql .= " AND (st.name LIKE ? OR c.name LIKE ? OR s.session_id LIKE ?)";
+            $search = "%{$filters['search']}%";
+            $params[] = $search;
+            $params[] = $search;
+            $params[] = $search;
+        }
+
         if (!empty($filters['status'])) {
-            $sql .= " AND status = ?";
+            $sql .= " AND s.status = ?";
             $params[] = $filters['status'];
+        }
+
+        if (!empty($filters['counselor_id'])) {
+            $sql .= " AND s.counselor_id = ?";
+            $params[] = $filters['counselor_id'];
         }
 
         $stmt = $this->db->prepare($sql);
@@ -131,10 +144,15 @@ class Session {
         $fields = [];
         $params = [];
 
+        $allowed = ['student_id', 'counselor_id', 'mode', 'datetime', 'status'];
         foreach ($data as $key => $value) {
-            $fields[] = "{$key} = ?";
-            $params[] = $value;
+            if (in_array($key, $allowed)) {
+                $fields[] = "{$key} = ?";
+                $params[] = $value;
+            }
         }
+
+        if (empty($fields)) return false;
 
         $params[] = $id;
         $sql = "UPDATE {$this->table} SET " . implode(', ', $fields) . " WHERE id = ?";

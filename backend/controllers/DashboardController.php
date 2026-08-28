@@ -58,11 +58,19 @@ class DashboardController extends Controller {
         }
 
         $password = $_POST['password'] ?? '';
+        $currentPassword = $_POST['current_password'] ?? '';
+
         if (!empty($password)) {
-            $db = getDB();
-            $stmt = $db->prepare("UPDATE users SET password = ? WHERE id = ?");
-            $stmt->execute([password_hash($password, PASSWORD_DEFAULT), $_SESSION['user_id']]);
-            flash('success', 'Password updated successfully.');
+            if (empty($currentPassword)) {
+                flash('error', 'Please enter your current password.');
+                $this->redirect(url('/admin/profile'));
+            }
+            $result = changeUserPassword($_SESSION['user_id'], $currentPassword, $password);
+            if ($result['ok']) {
+                flash('success', 'Password updated successfully.');
+            } else {
+                flash('error', $result['error']);
+            }
         } else {
             flash('error', 'Please enter a new password.');
         }

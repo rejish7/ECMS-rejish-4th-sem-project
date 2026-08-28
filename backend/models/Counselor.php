@@ -66,6 +66,16 @@ class Counselor {
             $params[] = $search;
         }
 
+        if (!empty($filters['specialization'])) {
+            $sql .= " AND specialization = ?";
+            $params[] = $filters['specialization'];
+        }
+
+        if (!empty($filters['status'])) {
+            $sql .= " AND status = ?";
+            $params[] = $filters['status'];
+        }
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchColumn();
@@ -90,10 +100,15 @@ class Counselor {
         $fields = [];
         $params = [];
 
+        $allowed = ['name', 'email', 'specialization', 'max_students', 'status'];
         foreach ($data as $key => $value) {
-            $fields[] = "{$key} = ?";
-            $params[] = $value;
+            if (in_array($key, $allowed)) {
+                $fields[] = "{$key} = ?";
+                $params[] = $value;
+            }
         }
+
+        if (empty($fields)) return false;
 
         $params[] = $id;
         $sql = "UPDATE {$this->table} SET " . implode(', ', $fields) . " WHERE id = ?";

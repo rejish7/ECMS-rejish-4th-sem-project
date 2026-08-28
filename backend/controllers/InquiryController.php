@@ -104,6 +104,23 @@ class InquiryController extends Controller {
         $this->redirect(url('/admin/inquiries/' . $id));
     }
 
+    public function close($id) {
+        if (!$this->isPost()) {
+            $this->redirect(url('/admin/inquiries'));
+        }
+
+        $inquiry = $this->inquiryModel->getById($id);
+        if (!$inquiry) {
+            flash('error', 'Inquiry not found.');
+            $this->redirect(url('/admin/inquiries'));
+        }
+
+        $this->inquiryModel->update($id, ['status' => 'closed']);
+
+        flash('success', 'Inquiry marked as closed. The student can now submit a new inquiry for this country.');
+        $this->redirect(url('/admin/inquiries/' . $id));
+    }
+
     public function destroy($id) {
         if (!$this->isPost()) {
             $this->redirect(url('/admin/inquiries'));

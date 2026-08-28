@@ -15,7 +15,19 @@
     <form method="POST" action="<?php echo url('/admin/counselors/' . $counselor['id'] . '/update'); ?>">
         <div class="form-group"><label>Name</label><input type="text" name="name" value="<?php echo e($counselor['name']); ?>" required></div>
         <div class="form-group"><label>Email</label><input type="email" name="email" value="<?php echo e($counselor['email']); ?>" required></div>
-        <div class="form-group"><label>Specialization</label><input type="text" name="specialization" value="<?php echo e($counselor['specialization'] ?? ''); ?>" required></div>
+        <div class="form-group">
+            <label>Specialization</label>
+            <select name="specialization" required>
+                <option value="">Select specialization</option>
+                <option value="Undergraduate" <?php echo ($counselor['specialization'] ?? '') === 'Undergraduate' ? 'selected' : ''; ?>>Undergraduate</option>
+                <option value="Postgraduate" <?php echo ($counselor['specialization'] ?? '') === 'Postgraduate' ? 'selected' : ''; ?>>Postgraduate</option>
+                <option value="Visa Counseling" <?php echo ($counselor['specialization'] ?? '') === 'Visa Counseling' ? 'selected' : ''; ?>>Visa Counseling</option>
+                <?php $counselorSpec = $counselor['specialization'] ?? ''; ?>
+                <?php if ($counselorSpec !== '' && !in_array($counselorSpec, ['Undergraduate', 'Postgraduate', 'Visa Counseling'], true)): ?>
+                    <option value="<?php echo e($counselorSpec); ?>" selected><?php echo e($counselorSpec); ?></option>
+                <?php endif; ?>
+            </select>
+        </div>
         <div class="form-group"><label>Max Students</label><input type="number" name="max_students" value="<?php echo e($counselor['max_students'] ?? 50); ?>"></div>
         <div class="form-group">
             <label>Status</label>

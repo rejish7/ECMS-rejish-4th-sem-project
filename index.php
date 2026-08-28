@@ -9,10 +9,12 @@ define('CONTROLLER_PATH', BACKEND_PATH . '/controllers');
 define('MODEL_PATH', BACKEND_PATH . '/models');
 define('LIBRARY_PATH', BACKEND_PATH . '/libraries');
 
+require_once BACKEND_PATH . '/config/constants.php';
 require_once BACKEND_PATH . '/core/Router.php';
 require_once BACKEND_PATH . '/core/Controller.php';
 require_once BACKEND_PATH . '/core/helpers.php';
 require_once BACKEND_PATH . '/config/database.php';
+require_once LIBRARY_PATH . '/Mailer.php';
 
 // Load controllers
 require_once CONTROLLER_PATH . '/DashboardController.php';
@@ -100,6 +102,7 @@ $router->get('/logout', function() {
 });
 
 $router->get('/register', function() {
+    unset($_SESSION['errors']);
     require VIEW_PATH . '/auth/student-registration.php';
 });
 
@@ -111,34 +114,48 @@ $router->post('/register', function() {
 
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
     $education_level = $_POST['education_level'] ?? '';
+    $qualification = $_POST['qualification'] ?? '';
+    $destination = $_POST['destination'] ?? '';
     $password = $_POST['password'] ?? '';
     $password_confirmation = $_POST['password_confirmation'] ?? '';
 
     $errors = [];
     if ($name === '') {
-        $errors[] = 'Please enter your full name.';
+        $errors['name'] = 'Please enter your full name.';
     }
     if ($email === '') {
-        $errors[] = 'Please enter your email address.';
+        $errors['email'] = 'Please enter your email address.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'Please enter a valid email address.';
+        $errors['email'] = 'Please enter a valid email address.';
+    }
+    if ($phone !== '' && !preg_match('/^\d{10}$/', $phone)) {
+        $errors['phone'] = 'Phone number must be exactly 10 digits.';
     }
     $allowedLevels = ['High School', 'Undergraduate', 'Postgraduate'];
     if ($education_level === '' || !in_array($education_level, $allowedLevels, true)) {
-        $errors[] = 'Please select a valid education level.';
+        $errors['education_level'] = 'Please select a desired study level.';
     }
     if ($password === '') {
-        $errors[] = 'Please choose a password.';
-    } elseif (strlen($password) < 6) {
-        $errors[] = 'Password must be at least 6 characters.';
+        $errors['password'] = 'Please choose a password.';
+    } elseif (strlen($password) < 8) {
+        $errors['password'] = 'Password must be at least 8 characters.';
     } elseif ($password !== $password_confirmation) {
-        $errors[] = 'Password confirmation does not match.';
+        $errors['password'] = 'The password confirmation does not match.';
     }
 
     if ($errors) {
-        $_SESSION['error'] = implode(' ', $errors);
-        $_SESSION['old'] = ['name' => $name, 'email' => $email, 'education_level' => $education_level];
+        $_SESSION['error'] = 'Please correct the highlighted fields below.';
+        $_SESSION['errors'] = $errors;
+        $_SESSION['old'] = [
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'education_level' => $education_level,
+            'qualification' => $qualification,
+            'destination' => $destination,
+        ];
         redirect(url('/register'));
     }
 
@@ -149,7 +166,15 @@ $router->post('/register', function() {
         $stmt->execute([$email]);
         if ($stmt->fetch()) {
             $_SESSION['error'] = 'An account with this email already exists.';
-            $_SESSION['old'] = ['name' => $name, 'email' => $email, 'education_level' => $education_level];
+            $_SESSION['errors'] = ['email' => 'An account with this email already exists.'];
+            $_SESSION['old'] = [
+                'name' => $name,
+                'email' => $email,
+                'phone' => $phone,
+                'education_level' => $education_level,
+                'qualification' => $qualification,
+                'destination' => $destination,
+            ];
             redirect(url('/register'));
         }
     }
@@ -167,6 +192,7 @@ $router->post('/register', function() {
     )->execute([$student_id, $name, $email, password_hash($password, PASSWORD_DEFAULT)]);
 
     unset($_SESSION['old']);
+    unset($_SESSION['errors']);
     $_SESSION['success'] = 'Account created successfully! Your Student ID is ' . $student_id . '. You can now sign in.';
     redirect(url('/login'));
 });
@@ -183,12 +209,23 @@ $router->get('/student/inquiries', ['StudentController', 'inquiries']);
 $router->post('/student/inquiries/store', ['StudentController', 'storeInquiry']);
 $router->get('/student/profile', ['StudentController', 'profile']);
 $router->post('/student/profile/update', ['StudentController', 'updateProfile']);
+$router->post('/student/profile/password', ['StudentController', 'updatePassword']);
 
 // Counselor portal
 $router->get('/counselor/dashboard', ['CounselorController', 'dashboard']);
+$router->get('/counselor/students', ['CounselorController', 'students']);
+$router->get('/counselor/students/{id}', ['CounselorController', 'studentShow']);
+$router->get('/counselor/sessions', ['CounselorController', 'sessions']);
+$router->get('/counselor/sessions/create', ['CounselorController', 'sessionCreate']);
+$router->post('/counselor/sessions/store', ['CounselorController', 'sessionStore']);
+$router->post('/counselor/sessions/{id}/status', ['CounselorController', 'sessionStatus']);
 $router->get('/counselor/documents', ['CounselorController', 'documents']);
 $router->get('/counselor/documents/assign', ['CounselorController', 'assignCreate']);
 $router->post('/counselor/documents/assign/store', ['CounselorController', 'assignStore']);
+$router->post('/counselor/documents/{id}/review', ['CounselorController', 'documentReview']);
+$router->get('/counselor/inquiries', ['CounselorController', 'inquiries']);
+$router->get('/counselor/profile', ['CounselorController', 'profile']);
+$router->post('/counselor/profile/password', ['CounselorController', 'updatePassword']);
 
 // Profile
 $router->get('/admin/profile', ['DashboardController', 'profile']);
@@ -240,6 +277,7 @@ $router->get('/admin/inquiries', ['InquiryController', 'index']);
 $router->get('/admin/inquiries/{id}', ['InquiryController', 'show']);
 $router->post('/admin/inquiries/{id}/assign', ['InquiryController', 'assign']);
 $router->post('/admin/inquiries/{id}/auto-assign', ['InquiryController', 'autoAssign']);
+$router->post('/admin/inquiries/{id}/close', ['InquiryController', 'close']);
 $router->post('/admin/inquiries/{id}/delete', ['InquiryController', 'destroy']);
 
 // College & Course Catalog

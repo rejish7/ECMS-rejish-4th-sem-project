@@ -35,6 +35,7 @@ composer.lock
 # Uploads (keep structure, ignore files)
 public/uploads/*
 !public/uploads/.gitkeep
+uploads/
 
 # Temp
 tmp/

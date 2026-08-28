@@ -73,6 +73,14 @@
         .flash-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
         .flash-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
 
+        .form-group .field-error { color: #dc2626; font-size: 12px; font-weight: 500; margin-top: 6px; }
+        .form-group.has-error input,
+        .form-group.has-error select { border-color: #dc2626; background-color: #fef2f2; }
+        .form-group.has-error input:focus,
+        .form-group.has-error select:focus { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); border-color: #dc2626; }
+        .form-group.has-error input::placeholder,
+        .form-group.has-error select::placeholder { color: #fca5a5; }
+
         @media (max-width: 600px) {
             .form-row { flex-direction: column; gap: 0; }
             .stepper { padding: 24px 20px 0; }
@@ -122,22 +130,25 @@
                 <div class="flash-success" style="margin:16px 40px 0;"><?php echo e($_SESSION['success']); unset($_SESSION['success']); ?></div>
             <?php endif; ?>
 
-            <form method="POST" action="<?php echo url('/register'); ?>">
+            <form method="POST" action="<?php echo url('/register'); ?>" id="register-form" novalidate>
                 <?php echo csrf_field(); ?>
                 <div class="form-body">
                     <!-- Personal Details -->
                     <div class="form-section">
                         <h3>Personal Details</h3>
                         <div class="form-row">
-                            <div class="form-group">
-                                <input type="text" name="name" placeholder="Full Name" value="<?php echo e(old('name')); ?>" required>
+                            <div class="form-group<?php echo field_error('name') ? ' has-error' : ''; ?>">
+                                <input type="text" name="name" placeholder="Full Name" value="<?php echo e(old('name')); ?>" data-required>
+                                <?php if (field_error('name')): ?><div class="field-error"><?php echo e(field_error('name')); ?></div><?php endif; ?>
                             </div>
-                            <div class="form-group">
-                                <input type="email" name="email" placeholder="Email Address" value="<?php echo e(old('email')); ?>" required>
+                            <div class="form-group<?php echo field_error('email') ? ' has-error' : ''; ?>">
+                                <input type="email" name="email" placeholder="Email Address" value="<?php echo e(old('email')); ?>" data-required>
+                                <?php if (field_error('email')): ?><div class="field-error"><?php echo e(field_error('email')); ?></div><?php endif; ?>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <input type="text" name="phone" placeholder="Phone Number">
+                        <div class="form-group<?php echo field_error('phone') ? ' has-error' : ''; ?>">
+                            <input type="tel" name="phone" id="phone" placeholder="Phone Number" pattern="[0-9]{10}" maxlength="10" title="Phone number must be exactly 10 digits." value="<?php echo e(old('phone')); ?>">
+                            <?php if (field_error('phone')): ?><div class="field-error"><?php echo e(field_error('phone')); ?></div><?php endif; ?>
                         </div>
                     </div>
 
@@ -147,11 +158,13 @@
                     <div class="form-section">
                         <h3>Login Credentials</h3>
                         <div class="form-row">
-                            <div class="form-group">
-                                <input type="password" name="password" placeholder="Create a password (min 6 characters)" required>
+                            <div class="form-group<?php echo field_error('password') ? ' has-error' : ''; ?>">
+                                <input type="password" name="password" placeholder="Create a password (min 6 characters)" data-required>
+                                <?php if (field_error('password')): ?><div class="field-error"><?php echo e(field_error('password')); ?></div><?php endif; ?>
                             </div>
-                            <div class="form-group">
-                                <input type="password" name="password_confirmation" placeholder="Confirm password" required>
+                            <div class="form-group<?php echo field_error('password_confirmation') ? ' has-error' : ''; ?>">
+                                <input type="password" name="password_confirmation" placeholder="Confirm password" data-required>
+                                <?php if (field_error('password_confirmation')): ?><div class="field-error"><?php echo e(field_error('password_confirmation')); ?></div><?php endif; ?>
                             </div>
                         </div>
                         <p style="font-size:12px;color:#9ca3af;margin-top:8px;">You will use your email and this password to sign in.</p>
@@ -163,29 +176,31 @@
                     <div class="form-section">
                         <h3>Academic Background</h3>
                         <div class="form-row">
-                            <div class="form-group floating-label">
+                            <div class="form-group floating-label<?php echo field_error('qualification') ? ' has-error' : ''; ?>">
                                 <label>Highest Qualification</label>
                                 <div class="select-wrap">
                                     <select name="qualification">
-                                        <option value="" disabled selected></option>
-                                        <option value="High School">High School</option>
-                                        <option value="Associate Degree">Associate Degree</option>
-                                        <option value="Bachelor's Degree">Bachelor's Degree</option>
-                                        <option value="Master's Degree">Master's Degree</option>
-                                        <option value="PhD">PhD</option>
+                                        <option value="" disabled<?php echo old('qualification') === '' ? ' selected' : ''; ?>></option>
+                                        <option value="High School" <?php echo old('qualification') === 'High School' ? 'selected' : ''; ?>>High School</option>
+                                        <option value="Associate Degree" <?php echo old('qualification') === 'Associate Degree' ? 'selected' : ''; ?>>Associate Degree</option>
+                                        <option value="Bachelor's Degree" <?php echo old('qualification') === "Bachelor's Degree" ? 'selected' : ''; ?>>Bachelor's Degree</option>
+                                        <option value="Master's Degree" <?php echo old('qualification') === "Master's Degree" ? 'selected' : ''; ?>>Master's Degree</option>
+                                        <option value="PhD" <?php echo old('qualification') === 'PhD' ? 'selected' : ''; ?>>PhD</option>
                                     </select>
                                 </div>
+                                <?php if (field_error('qualification')): ?><div class="field-error"><?php echo e(field_error('qualification')); ?></div><?php endif; ?>
                             </div>
-                            <div class="form-group floating-label">
+                            <div class="form-group floating-label<?php echo field_error('education_level') ? ' has-error' : ''; ?>">
                                 <label>Desired Study Level</label>
                                 <div class="select-wrap">
-                                    <select name="education_level" required>
-                                        <option value="" disabled selected></option>
+                                    <select name="education_level" data-required>
+                                        <option value="" disabled<?php echo old('education_level') === '' ? ' selected' : ''; ?>></option>
                                         <option value="High School" <?php echo old('education_level') === 'High School' ? 'selected' : ''; ?>>High School</option>
                                         <option value="Undergraduate" <?php echo old('education_level') === 'Undergraduate' ? 'selected' : ''; ?>>Undergraduate</option>
                                         <option value="Postgraduate" <?php echo old('education_level') === 'Postgraduate' ? 'selected' : ''; ?>>Postgraduate</option>
                                     </select>
                                 </div>
+                                <?php if (field_error('education_level')): ?><div class="field-error"><?php echo e(field_error('education_level')); ?></div><?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -195,20 +210,21 @@
                     <!-- Preferences -->
                     <div class="form-section">
                         <h3>Preferences</h3>
-                        <div class="form-group floating-label">
+                        <div class="form-group floating-label<?php echo field_error('destination') ? ' has-error' : ''; ?>">
                             <label>Preferred Study Destination</label>
                             <div class="select-wrap">
                                 <select name="destination">
-                                    <option value="" disabled selected></option>
-                                    <option value="USA">United States</option>
-                                    <option value="UK">United Kingdom</option>
-                                    <option value="Canada">Canada</option>
-                                    <option value="Australia">Australia</option>
-                                    <option value="Germany">Germany</option>
-                                    <option value="New Zealand">New Zealand</option>
-                                    <option value="Other">Other</option>
+                                    <option value="" disabled<?php echo old('destination') === '' ? ' selected' : ''; ?>></option>
+                                    <option value="USA" <?php echo old('destination') === 'USA' ? 'selected' : ''; ?>>United States</option>
+                                    <option value="UK" <?php echo old('destination') === 'UK' ? 'selected' : ''; ?>>United Kingdom</option>
+                                    <option value="Canada" <?php echo old('destination') === 'Canada' ? 'selected' : ''; ?>>Canada</option>
+                                    <option value="Australia" <?php echo old('destination') === 'Australia' ? 'selected' : ''; ?>>Australia</option>
+                                    <option value="Germany" <?php echo old('destination') === 'Germany' ? 'selected' : ''; ?>>Germany</option>
+                                    <option value="New Zealand" <?php echo old('destination') === 'New Zealand' ? 'selected' : ''; ?>>New Zealand</option>
+                                    <option value="Other" <?php echo old('destination') === 'Other' ? 'selected' : ''; ?>>Other</option>
                                 </select>
                             </div>
+                            <?php if (field_error('destination')): ?><div class="field-error"><?php echo e(field_error('destination')); ?></div><?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -238,7 +254,7 @@
             let currentStep = 0;
 
             sections.forEach((section, i) => {
-                const sectionInputs = section.querySelectorAll('input[required], select[required]');
+                const sectionInputs = section.querySelectorAll('[data-required]');
                 let filled = 0;
                 sectionInputs.forEach(inp => { if (inp.value) filled++; });
                 if (sectionInputs.length > 0 && filled === sectionInputs.length) {
@@ -255,6 +271,89 @@
 
         inputs.forEach(inp => inp.addEventListener('change', updateStepper));
         inputs.forEach(inp => inp.addEventListener('input', updateStepper));
+
+        // Field validation helpers
+        function setFieldError(input, message) {
+            const group = input.closest('.form-group');
+            let errEl = group.querySelector('.field-error');
+            if (!errEl) {
+                errEl = document.createElement('div');
+                errEl.className = 'field-error';
+                group.appendChild(errEl);
+            }
+            errEl.textContent = message || '';
+            group.classList.toggle('has-error', !!message);
+        }
+
+        const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        function validateField(field) {
+            const name = field.name;
+            const value = field.value.trim();
+
+            if (name === 'name') {
+                if (!value) { setFieldError(field, 'Full name is required.'); return false; }
+                setFieldError(field, ''); return true;
+            }
+            if (name === 'email') {
+                if (!value) { setFieldError(field, 'Email address is required.'); return false; }
+                if (!emailRe.test(value)) { setFieldError(field, 'Please enter a valid email address.'); return false; }
+                setFieldError(field, ''); return true;
+            }
+            if (name === 'phone') {
+                if (value && !/^\d{10}$/.test(value)) { setFieldError(field, 'Phone number must be exactly 10 digits.'); return false; }
+                setFieldError(field, ''); return true;
+            }
+            if (name === 'password') {
+                if (!field.value) { setFieldError(field, 'Password is required.'); return false; }
+                if (field.value.length < 6) { setFieldError(field, 'Password must be at least 6 characters.'); return false; }
+                setFieldError(field, ''); return true;
+            }
+            if (name === 'password_confirmation') {
+                const pw = document.getElementById('register-form').querySelector('input[name="password"]');
+                if (field.value !== pw.value) { setFieldError(field, 'Passwords do not match.'); return false; }
+                setFieldError(field, ''); return true;
+            }
+            if (name === 'education_level') {
+                if (!value) { setFieldError(field, 'Please select a desired study level.'); return false; }
+                setFieldError(field, ''); return true;
+            }
+            return true;
+        }
+
+        function validateRegisterForm() {
+            const fields = ['name', 'email', 'phone', 'password', 'password_confirmation', 'education_level'];
+            let valid = true;
+            fields.forEach(function (n) {
+                const field = document.getElementById('register-form').querySelector('[name="' + n + '"]');
+                if (!validateField(field)) valid = false;
+            });
+            return valid;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('register-form');
+            const fields = ['name', 'email', 'phone', 'password', 'password_confirmation', 'education_level'];
+
+            form.addEventListener('submit', function (e) {
+                if (!validateRegisterForm()) {
+                    e.preventDefault();
+                }
+            });
+
+            fields.forEach(function (n) {
+                const field = form.querySelector('[name="' + n + '"]');
+                field.addEventListener('input', function () {
+                    if (field.name === 'phone') {
+                        this.value = this.value.replace(/\D/g, '').slice(0, 10);
+                    }
+                    setFieldError(field, '');
+                });
+                field.addEventListener('blur', function () {
+                    validateField(field);
+                });
+            });
+        });
     </script>
 </body>
 </html>

@@ -38,6 +38,14 @@ class Router {
         
         $uri = rtrim($uri, '/') ?: '/';
 
+        // CSRF protection for all POST requests (except login/register which handle it inline)
+        if ($method === 'POST' && !in_array($uri, ['/login', '/register'], true)) {
+            if (!verify_csrf()) {
+                flash('error', 'Invalid session token. Please try again.');
+                redirect(url('/login'));
+            }
+        }
+
         // Protect authenticated areas (admin/counselor/student dashboards)
         if (preg_match('#^/(admin|counselor|student)(/|$)#', $uri)) {
             if (!isLoggedIn()) {
@@ -45,39 +53,18 @@ class Router {
             }
         }
 
-        // Admin area requires the admin role
-        if (preg_match('#^/admin(/|$)#', $uri)) {
-            $user = getUser();
-            if (!$user || $user['role'] !== 'admin') {
-                $_SESSION['error'] = 'You do not have permission to access that page.';
-                redirect(url('/login'));
+        // Consolidated role-based access control
+        $roleMap = ['admin' => 'admin', 'counselor' => 'counselor', 'student' => 'student'];
+        foreach ($roleMap as $prefix => $requiredRole) {
+            if (preg_match('#^/' . $prefix . '(/|$)#', $uri)) {
+                $user = getUser();
+                if (!$user || $user['role'] !== $requiredRole) {
+                    flash('error', 'You do not have permission to access that page.');
+                    redirect(url('/login'));
+                }
+                break;
             }
         }
-
-        // Counselor area requires the counselor role
-        if (preg_match('#^/counselor(/|$)#', $uri)) {
-            $user = getUser();
-            if (!$user || $user['role'] !== 'counselor') {
-                $_SESSION['error'] = 'You do not have permission to access that page.';
-                redirect(url('/login'));
-            }
-        }
-
-        // Student area requires the student role
-        if (preg_match('#^/student(/|$)#', $uri)) {
-            $user = getUser();
-            if (!$user || $user['role'] !== 'student') {
-                $_SESSION['error'] = 'You do not have permission to access that page.';
-                redirect(url('/login'));
-            }
-        }
-
-        // Debug
-        error_log("REQUEST_URI: {$_SERVER['REQUEST_URI']}");
-        error_log("SCRIPT_NAME: {$scriptName}");
-        error_log("scriptDir: {$scriptDir}");
-        error_log("Final URI: {$uri}");
-        error_log("Routes for {$method}: " . print_r(array_keys($this->routes[$method] ?? []), true));
 
         if (isset($this->routes[$method])) {
             foreach ($this->routes[$method] as $route => $handler) {
@@ -94,7 +81,7 @@ class Router {
         }
 
         http_response_code(404);
-        echo '404 - Page Not Found';
+        require VIEW_PATH . '/errors/404.php';
     }
 
     private function convertToRegex($route) {

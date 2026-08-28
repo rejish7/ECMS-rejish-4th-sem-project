@@ -66,6 +66,16 @@ class Student {
             $params[] = $search;
         }
 
+        if (!empty($filters['level'])) {
+            $sql .= " AND education_level = ?";
+            $params[] = $filters['level'];
+        }
+
+        if (!empty($filters['counselor_id'])) {
+            $sql .= " AND counselor_id = ?";
+            $params[] = $filters['counselor_id'];
+        }
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchColumn();
@@ -91,13 +101,18 @@ class Student {
         $fields = [];
         $params = [];
 
+        $allowed = ['student_id', 'name', 'email', 'education_level', 'counselor_id', 'status'];
         foreach ($data as $key => $value) {
-            if ($key === 'counselor_id') {
-                $value = !empty($value) ? $value : null;
+            if (in_array($key, $allowed)) {
+                if ($key === 'counselor_id') {
+                    $value = !empty($value) ? $value : null;
+                }
+                $fields[] = "{$key} = ?";
+                $params[] = $value;
             }
-            $fields[] = "{$key} = ?";
-            $params[] = $value;
         }
+
+        if (empty($fields)) return false;
 
         $params[] = $id;
         $sql = "UPDATE {$this->table} SET " . implode(', ', $fields) . " WHERE id = ?";

@@ -34,6 +34,16 @@
     .doc-link { font-size: 13px; color: #0054cb; font-weight: 500; text-decoration: none; }
     .doc-link:hover { text-decoration: underline; }
     .doc-empty { text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 14px; }
+
+    .doc-review { display: flex; flex-direction: column; gap: 6px; }
+    .doc-review .doc-review-top { display: flex; gap: 6px; }
+    .doc-review select { height: 32px; padding: 0 8px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; color: #344054; background: #fff; min-width: 120px; }
+    .doc-review select:focus { outline: none; border-color: #0054cb; }
+    .doc-review input[type="text"] { height: 32px; padding: 0 8px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; color: #344054; background: #fff; flex: 1; }
+    .doc-review input[type="text"]:focus { outline: none; border-color: #0054cb; }
+    .doc-review button { height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; font-size: 13px; font-weight: 500; color: #43474f; cursor: pointer; white-space: nowrap; }
+    .doc-review button:hover { background: #f9fafb; border-color: #d1d5db; }
+    .doc-review .doc-review-remarks { display: flex; gap: 6px; }
 </style>
 <div class="doc-page">
     <section class="doc-header">
@@ -54,6 +64,7 @@
                             <th>Assigned By</th>
                             <th>Status</th>
                             <th>Submitted</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -78,6 +89,26 @@
                                 <td><?php echo e($doc['assigned_by_name'] ?? '-'); ?></td>
                                 <td><span class="doc-badge doc-badge--<?php echo e($doc['status']); ?>"><?php echo e(ucfirst($doc['status'])); ?></span></td>
                                 <td><?php echo $doc['submitted_at'] ? e(date('M d, Y', strtotime($doc['submitted_at']))) : '<span style="color:#9ca3af;">Not yet</span>'; ?></td>
+                                <td>
+                                    <?php if (in_array($doc['status'] ?? '', ['pending', 'resubmit'], true)): ?>
+                                        <form class="doc-review" method="POST" action="<?php echo url('/counselor/documents/' . $doc['id'] . '/review'); ?>">
+                                            <div class="doc-review-top">
+                                                <select name="status" required>
+                                                    <option value="">Review&hellip;</option>
+                                                    <option value="approved">Approve</option>
+                                                    <option value="rejected">Reject</option>
+                                                    <option value="resubmit">Request Resubmit</option>
+                                                </select>
+                                                <button type="submit">Submit</button>
+                                            </div>
+                                            <div class="doc-review-remarks">
+                                                <input type="text" name="remarks" placeholder="Remarks (optional)">
+                                            </div>
+                                        </form>
+                                    <?php else: ?>
+                                        <div style="font-size:12px;color:#9ca3af;max-width:200px;"><?php echo e($doc['remarks'] ?? '-'); ?></div>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS documents (
     id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT,
     name VARCHAR(255) NOT NULL,
-    size VARCHAR(20),
+    size INT UNSIGNED,
     type VARCHAR(20),
     category ENUM('education', 'visa') DEFAULT 'education',
     assigned_by INT,
@@ -69,6 +69,18 @@ CREATE TABLE IF NOT EXISTS documents (
     FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE SET NULL
 );
+
+CREATE INDEX idx_students_email ON students(email);
+CREATE INDEX idx_students_counselor_id ON students(counselor_id);
+CREATE INDEX idx_sessions_student_id ON sessions(student_id);
+CREATE INDEX idx_sessions_counselor_id ON sessions(counselor_id);
+CREATE INDEX idx_documents_student_id ON documents(student_id);
+CREATE INDEX idx_documents_status ON documents(status);
+CREATE INDEX idx_inquiries_student_id ON inquiries(student_id);
+CREATE INDEX idx_inquiries_counselor_id ON inquiries(counselor_id);
+CREATE INDEX idx_inquiries_status ON inquiries(status);
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_role ON users(role);
 
 CREATE TABLE IF NOT EXISTS inquiries (
     id INT AUTO_INCREMENT PRIMARY KEY,

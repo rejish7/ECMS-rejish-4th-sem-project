@@ -79,7 +79,7 @@ ob_start();
                                 <?php if ($doc['status'] === 'resubmit'): ?>
                                     Your document was reviewed and needs a revision. Upload your updated file below.
                                 <?php else: ?>
-                                    Assigner <?php echo e($doc['assigned_by_name'] ?? 'requested'); ?> this document. Please upload the file to proceed.
+                                    Assigned by <?php echo e($doc['assigned_by_name'] ?? 'requested'); ?> this document. Please upload the file to proceed.
                                 <?php endif; ?>
                             </div>
                             <?php if (!empty($doc['remarks'])): ?>

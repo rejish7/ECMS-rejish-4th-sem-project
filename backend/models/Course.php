@@ -66,14 +66,6 @@ class Course {
         return $stmt->fetch();
     }
 
-    public function getByCollegeId($college_id) {
-        $stmt = $this->db->prepare(
-            "SELECT * FROM {$this->table} WHERE college_id = ? ORDER BY name ASC"
-        );
-        $stmt->execute([$college_id]);
-        return $stmt->fetchAll();
-    }
-
     public function count($filters = []) {
         $sql = "SELECT COUNT(*) FROM {$this->table} c LEFT JOIN colleges col ON c.college_id = col.id WHERE 1=1";
         $params = [];

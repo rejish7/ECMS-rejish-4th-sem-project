@@ -37,3 +37,19 @@ if (!defined('APP_URL')) {
     $path = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
     define('APP_URL', $protocol . '://' . $host . $path);
 }
+
+if (!defined('ITEMS_PER_PAGE')) {
+    define('ITEMS_PER_PAGE', 10);
+}
+
+if (!defined('MAX_FILE_SIZE')) {
+    define('MAX_FILE_SIZE', 10 * 1024 * 1024);
+}
+
+if (!defined('DIR_PERMISSIONS')) {
+    define('DIR_PERMISSIONS', 0755);
+}
+
+if (!defined('ALLOWED_UPLOAD_TYPES')) {
+    define('ALLOWED_UPLOAD_TYPES', ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'doc', 'docx', 'xls', 'xlsx']);
+}

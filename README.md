@@ -1,4 +1,4 @@
-# ECMS - Education Counseling Management System
+# ECMS - Education Consultancy  Management System
 
 A web-based application for managing educational counseling interactions between administrators, counselors, and students.
 
@@ -79,18 +79,18 @@ git clone <repository-url> "ECMS(rejish)"
 
 ### 3. Database Setup
 1. Open phpMyAdmin: `http://localhost/phpmyadmin`
-2. Create a new database named `ecms`
-3. Import the schema:
+2. Import the schema:
    - Navigate to `backend/sql/schema.sql`
    - Import via phpMyAdmin or MySQL CLI
 
 ### 4. Configuration
-Edit `backend/config/database.php` if needed:
-```php
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'ecms');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+Copy `.env.example` to `.env` and update if needed:
+```
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=ecmss
+DB_USERNAME=root
+DB_PASSWORD=
 ```
 
 ### 5. Access Application
@@ -103,15 +103,21 @@ http://localhost/ECMS(rejish)/
 ### Database Settings
 | Setting | Value |
 |---------|-------|
-| Host | localhost |
-| Database | ecms |
+| Host | 127.0.0.1 |
+| Database | ecmss |
 | Username | root |
 | Password | (empty) |
 | Charset | utf8mb4 |
 
-### Application Constants
-- `APP_NAME`: ECMS
-- `APP_VERSION`: 1.0.0
+### Environment Variables
+| Variable | Description |
+|----------|-------------|
+| `DB_HOST` | Database host |
+| `DB_PORT` | Database port |
+| `DB_DATABASE` | Database name |
+| `DB_USERNAME` | Database username |
+| `DB_PASSWORD` | Database password |
+| `APP_SECRET` | Secret key for remember-me tokens (change in production) |
 
 ## Development
 
@@ -150,8 +156,7 @@ $db = Database::getInstance()->getConnection();
 ## File Upload
 
 Uploaded files are stored in:
-- Documents: `public/documents/`
-- Profiles: `public/profiles/`
+- Documents: `uploads/documents/`
 
 ## License
 

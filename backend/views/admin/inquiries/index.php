@@ -47,6 +47,7 @@
     .inq-action-btn--view svg { color: #2563eb; }
     .inq-action-btn--assign svg { color: #059669; }
     .inq-action-btn--auto svg { color: #7c3aed; }
+    .inq-action-btn--close svg { color: #6b7280; }
     .inq-action-btn--delete svg { color: #ef4444; }
 
     .inq-empty { text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 14px; }
@@ -139,13 +140,15 @@
                                 <div class="inq-actions">
                                     <a href="<?php echo url('/admin/inquiries/' . $inq['id']); ?>" class="inq-action-btn inq-action-btn--view" title="View">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0Z" /></svg>
-                                    </a>
-                                    <button type="button" class="inq-action-btn inq-action-btn--assign" title="Assign Counselor" onclick="openAssignModal(<?php echo e($inq['id']); ?>, '<?php echo e(addslashes($inq['inquiry_id'])); ?>')">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
-                                    </button>
+                                </a>
                                     <form method="POST" action="<?php echo url('/admin/inquiries/' . $inq['id'] . '/auto-assign'); ?>" style="display:inline;" onsubmit="return confirm('Auto-assign to least busy counselor?')">
                                         <button type="submit" class="inq-action-btn inq-action-btn--auto" title="Auto-Assign">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="<?php echo url('/admin/inquiries/' . $inq['id'] . '/close'); ?>" style="display:inline;" onsubmit="return confirm('Mark this inquiry as closed? The student will be able to submit a new inquiry for this country.')">
+                                        <button type="submit" class="inq-action-btn inq-action-btn--close" title="Mark as Closed">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                         </button>
                                     </form>
                                     <form method="POST" action="<?php echo url('/admin/inquiries/' . $inq['id'] . '/delete'); ?>" style="display:inline;" onsubmit="return confirm('Are you sure?')">

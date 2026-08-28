@@ -44,6 +44,16 @@ class Controller {
         return $_SERVER['REQUEST_METHOD'] === 'POST';
     }
 
+    protected function verifyCsrfOrAbort() {
+        if (!$this->isPost()) {
+            return;
+        }
+        if (!verify_csrf()) {
+            flash('error', 'Invalid session token. Please try again.');
+            $this->redirect(url(dashboardPathFor()));
+        }
+    }
+
     protected function getInput() {
         $input = json_decode(file_get_contents('php://input'), true);
         return $input ?? $_POST;

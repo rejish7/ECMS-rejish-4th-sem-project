@@ -37,13 +37,18 @@
     <div class="profile-card">
         <h3>Change Password</h3>
         <form method="POST" action="<?php echo url('/admin/profile/update'); ?>">
+            <?php echo csrf_field(); ?>
+            <div class="form-group">
+                <label>Current Password</label>
+                <input type="password" name="current_password" minlength="8" required>
+            </div>
             <div class="form-group">
                 <label>New Password</label>
-                <input type="password" name="password" minlength="6">
+                <input type="password" name="password" minlength="8">
             </div>
             <div class="form-group">
                 <label>Confirm Password</label>
-                <input type="password" name="password_confirm" minlength="6">
+                <input type="password" name="password_confirm" minlength="8">
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn-primary" onclick="if(this.form.password.value !== this.form.password_confirm.value){alert('Passwords do not match');return false;}">Update Password</button>

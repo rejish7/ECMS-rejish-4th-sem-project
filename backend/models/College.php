@@ -54,8 +54,9 @@ class College {
         $params = [];
 
         if (!empty($filters['search'])) {
-            $sql .= " AND (name LIKE ? OR code LIKE ? OR country LIKE ?)";
+            $sql .= " AND (name LIKE ? OR code LIKE ? OR country LIKE ? OR city LIKE ?)";
             $search = "%{$filters['search']}%";
+            $params[] = $search;
             $params[] = $search;
             $params[] = $search;
             $params[] = $search;

@@ -83,7 +83,11 @@ class DocumentController extends Controller {
             $this->redirect(url('/admin/documents/review-queue'));
         }
 
-        $this->documentModel->review($id, $status, $remarks, $_SESSION['user_id'] ?? 1);
+        $userId = $_SESSION['user_id'] ?? null;
+        if (!$userId) {
+            $this->redirect(url('/login'));
+        }
+        $this->documentModel->review($id, $status, $remarks, $userId);
 
         flash('success', 'Document review submitted successfully.');
         $this->redirect(url('/admin/documents/review-queue'));
@@ -148,23 +152,38 @@ class DocumentController extends Controller {
         }
 
         if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+            $allowedTypes = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'doc', 'docx', 'xls', 'xlsx'];
+            $ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
+            if (!in_array($ext, $allowedTypes, true)) {
+                flash('error', 'File type not allowed. Allowed: ' . implode(', ', $allowedTypes));
+                $this->redirect(url('/admin/documents/create'));
+            }
+
+            if ($_FILES['file']['size'] > 10 * 1024 * 1024) {
+                flash('error', 'File is too large. Maximum file size is 10 MB.');
+                $this->redirect(url('/admin/documents/create'));
+            }
+
             $uploadDir = BASE_PATH . '/uploads/documents/';
             if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
+                mkdir($uploadDir, 0755, true);
             }
-            chmod($uploadDir, 0777);
 
-            $fileName = time() . '_' . basename($_FILES['file']['name']);
+            $fileName = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
             $filePath = $uploadDir . $fileName;
 
             if (move_uploaded_file($_FILES['file']['tmp_name'], $filePath)) {
                 $data['file_path'] = '/uploads/documents/' . $fileName;
                 $data['size'] = $_FILES['file']['size'];
-                $data['type'] = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+                $data['type'] = $ext;
             }
         }
 
-        $data['uploaded_by'] = $_SESSION['user_id'] ?? 1;
+        $userId = $_SESSION['user_id'] ?? null;
+        if (!$userId) {
+            $this->redirect(url('/login'));
+        }
+        $data['uploaded_by'] = $userId;
         $this->documentModel->create($data);
 
         flash('success', 'Document uploaded successfully.');

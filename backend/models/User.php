@@ -59,12 +59,20 @@ class User {
     }
 
     public function count($filters = []) {
-        $sql = "SELECT COUNT(*) FROM (SELECT id, role, status FROM users
+        $sql = "SELECT COUNT(*) FROM (SELECT id, name, email, user_id, role, status FROM users
                  UNION ALL
-                 SELECT id, 'student' AS role, status FROM students
+                 SELECT id, name, email, student_id AS user_id, 'student' AS role, status FROM students
                  UNION ALL
-                 SELECT id, 'counselor' AS role, status FROM counselors) AS all_users WHERE 1=1";
+                 SELECT id, name, email, email AS user_id, 'counselor' AS role, status FROM counselors) AS all_users WHERE 1=1";
         $params = [];
+
+        if (!empty($filters['search'])) {
+            $sql .= " AND (name LIKE ? OR email LIKE ? OR user_id LIKE ?)";
+            $search = "%{$filters['search']}%";
+            $params[] = $search;
+            $params[] = $search;
+            $params[] = $search;
+        }
 
         if (!empty($filters['role'])) {
             $sql .= " AND role = ?";

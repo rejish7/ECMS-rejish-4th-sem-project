@@ -145,27 +145,30 @@ class Document {
     }
 
     public function count($filters = []) {
-        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE 1=1";
+        $sql = "SELECT COUNT(*) FROM {$this->table} d LEFT JOIN students s ON d.student_id = s.id WHERE 1=1";
         $params = [];
 
         if (!empty($filters['category'])) {
-            $sql .= " AND category = ?";
+            $sql .= " AND d.category = ?";
             $params[] = $filters['category'];
         }
 
         if (!empty($filters['status'])) {
-            $sql .= " AND status = ?";
+            $sql .= " AND d.status = ?";
             $params[] = $filters['status'];
         }
 
         if (!empty($filters['student_id'])) {
-            $sql .= " AND student_id = ?";
+            $sql .= " AND d.student_id = ?";
             $params[] = $filters['student_id'];
         }
 
         if (!empty($filters['search'])) {
-            $sql .= " AND (name LIKE ?)";
-            $params[] = "%{$filters['search']}%";
+            $sql .= " AND (d.name LIKE ? OR s.name LIKE ? OR s.student_id LIKE ?)";
+            $search = "%{$filters['search']}%";
+            $params[] = $search;
+            $params[] = $search;
+            $params[] = $search;
         }
 
         $stmt = $this->db->prepare($sql);

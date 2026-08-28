@@ -12,6 +12,8 @@
     .btn-auto { display: inline-flex; align-items: center; height: 40px; padding: 0 24px; border-radius: 8px; background: #7c3aed; color: #fff; font-size: 14px; font-weight: 500; border: none; cursor: pointer; }
     .btn-auto:hover { background: #6d28d9; }
     .btn-danger { display: inline-flex; align-items: center; height: 40px; padding: 0 24px; border-radius: 8px; background: #ef4444; color: #fff; font-size: 14px; font-weight: 500; border: none; cursor: pointer; }
+    .btn-close { display: inline-flex; align-items: center; height: 40px; padding: 0 24px; border-radius: 8px; background: #6b7280; color: #fff; font-size: 14px; font-weight: 500; border: none; cursor: pointer; }
+    .btn-close:hover { background: #4b5563; }
     .inq-badge { display: inline-flex; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
     .inq-badge--new { background: #fef3c7; color: #d97706; }
     .inq-badge--assigned { background: #dbeafe; color: #2563eb; }
@@ -48,6 +50,11 @@
     <div class="detail-row"><span class="detail-label">Counselor</span><span class="detail-value"><?php echo e($inquiry['counselor_name'] ?? 'Unassigned'); ?></span></div>
     <div class="detail-row"><span class="detail-label">Created</span><span class="detail-value"><?php echo e($inquiry['created_at'] ?? '-'); ?></span></div>
     <div class="detail-actions">
+        <?php if (($inquiry['status'] ?? '') !== 'closed'): ?>
+            <form method="POST" action="<?php echo url('/admin/inquiries/' . $inquiry['id'] . '/close'); ?>" style="display:inline;" onsubmit="return confirm('Mark this inquiry as closed? The student will be able to submit a new inquiry for this country.')">
+                <button type="submit" class="btn-close">Mark as Closed</button>
+            </form>
+        <?php endif; ?>
         <button type="button" class="btn-primary" onclick="document.getElementById('assignModal').classList.add('active')">Assign Counselor</button>
         <form method="POST" action="<?php echo url('/admin/inquiries/' . $inquiry['id'] . '/auto-assign'); ?>" style="display:inline;" onsubmit="return confirm('Auto-assign to least busy counselor?')">
             <button type="submit" class="btn-auto">Auto-Assign</button>

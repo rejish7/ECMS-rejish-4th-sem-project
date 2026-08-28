@@ -10,6 +10,7 @@ class StudentController extends Controller {
     private $counselorModel;
     private $inquiryModel;
     private $documentModel;
+    private $sessionModel;
 
     public function __construct() {
         parent::__construct();
@@ -61,9 +62,31 @@ class StudentController extends Controller {
         }
 
         $data = $this->sanitize($this->getInput());
-        $this->studentModel->create($data);
 
-        flash('success', 'Student registered successfully.');
+        try {
+            $id = $this->studentModel->create($data);
+        } catch (PDOException $e) {
+            flash('error', 'Could not register student. Check that the email and student ID are unique.');
+            $this->redirect(url('/admin/students'));
+        }
+
+        $password = $data['password'] ?? '';
+        if (strlen($password) < 8) {
+            $password = generateTempPassword();
+        }
+
+        $result = createLoginAccount('student', $data['student_id'] ?? ('USR-STU-' . $id), $data['name'], $data['email'], $password);
+
+        if ($result['created']) {
+            $msg = 'Student registered successfully. ';
+            $msg .= $result['emailed']
+                ? 'Login credentials emailed to ' . $data['email'] . '.'
+                : 'A login account was created but the email could not be sent. Temporary password: ' . $result['password'];
+        } else {
+            $msg = 'Student registered successfully, but a login account already exists for ' . $data['email'] . '.';
+        }
+
+        flash('success', $msg);
         $this->redirect(url('/admin/students'));
     }
 
@@ -224,13 +247,19 @@ class StudentController extends Controller {
             $this->redirect(url('/student/documents'));
         }
 
+        $allowedTypes = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'doc', 'docx', 'xls', 'xlsx'];
+        $ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowedTypes, true)) {
+            flash('error', 'File type not allowed. Allowed: ' . implode(', ', $allowedTypes));
+            $this->redirect(url('/student/documents'));
+        }
+
         $uploadDir = BASE_PATH . '/uploads/documents/';
         if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
+            mkdir($uploadDir, 0755, true);
         }
-        chmod($uploadDir, 0777);
 
-        $fileName = time() . '_' . $id . '_' . basename($_FILES['file']['name']);
+        $fileName = time() . '_' . $id . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
         $filePath = $uploadDir . $fileName;
 
         if (!move_uploaded_file($_FILES['file']['tmp_name'], $filePath)) {
@@ -241,7 +270,7 @@ class StudentController extends Controller {
         $this->documentModel->submit($id, [
             'file_path' => '/uploads/documents/' . $fileName,
             'size' => $_FILES['file']['size'],
-            'type' => pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION),
+            'type' => $ext,
         ]);
 
         flash('success', 'Document submitted successfully. It is now awaiting review.');
@@ -250,11 +279,11 @@ class StudentController extends Controller {
 
     public function inquiries() {
         $student = $this->currentStudent();
-        $inquiries = $student ? $this->inquiryModel->getByStudentId($student['id']) : [];
+        $allInquiries = $student ? $this->inquiryModel->getByStudentId($student['id']) : [];
 
         $inquiredCountries = [];
-        if ($student) {
-            foreach ($inquiries as $inq) {
+        foreach ($allInquiries as $inq) {
+            if (($inq['status'] ?? '') !== 'closed') {
                 $inquiredCountries[] = $inq['country_of_interest'];
             }
         }
@@ -264,7 +293,6 @@ class StudentController extends Controller {
             'pageDescription' => 'Submit and track your inquiries.',
             'currentPage' => 'inquiries',
             'student' => $student,
-            'inquiries' => $inquiries,
             'inquiredCountries' => $inquiredCountries,
         ]);
     }
@@ -350,6 +378,27 @@ class StudentController extends Controller {
         $this->studentModel->update($student['id'], $clean);
 
         flash('success', 'Profile updated successfully.');
+        $this->redirect(url('/student/profile'));
+    }
+
+    public function updatePassword() {
+        if (!$this->isPost()) {
+            $this->redirect(url('/student/profile'));
+        }
+
+        $userId = $_SESSION['user_id'] ?? null;
+        if (!$userId) {
+            $this->redirect(url('/login'));
+        }
+
+        $data = $this->getInput();
+        $result = changeUserPassword($userId, $data['current_password'] ?? '', $data['password'] ?? '');
+
+        if ($result['ok']) {
+            flash('success', 'Password updated successfully.');
+        } else {
+            flash('error', $result['error']);
+        }
         $this->redirect(url('/student/profile'));
     }
 }

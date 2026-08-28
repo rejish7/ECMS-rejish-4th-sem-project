@@ -15,6 +15,9 @@ function loadEnv($path) {
         list($key, $value) = explode('=', $line, 2);
         $key = trim($key);
         $value = trim($value);
+        if (preg_match('/^([\'"])(.*)\1$/', $value, $m)) {
+            $value = $m[2];
+        }
         putenv("$key=$value");
     }
 }
@@ -47,7 +50,9 @@ class Database {
                 PDO::ATTR_EMULATE_PREPARES => false
             ]);
         } catch (PDOException $e) {
-            die("Database connection failed: " . $e->getMessage());
+            error_log("Database connection failed: " . $e->getMessage());
+            http_response_code(500);
+            die("A database error occurred. Please try again later.");
         }
     }
 

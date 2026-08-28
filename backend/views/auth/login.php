@@ -34,6 +34,10 @@ $assetPath = url('/frontend/assets');
         .login-form input[type="text"] { width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d0d5dd; border-radius: 8px; font-size: 14px; color: #101828; background: #fff; transition: border-color 0.2s; }
         .login-form input:focus { outline: none; border-color: #0054cb; box-shadow: 0 0 0 3px rgba(0,84,203,0.1); }
         .login-form input::placeholder { color: #9ca3af; }
+        .login-form .field-error { display: none; font-size: 12px; color: #dc2626; margin-top: 6px; }
+        .login-form .has-error input { border-color: #dc2626; }
+        .login-form .has-error input:focus { box-shadow: 0 0 0 3px rgba(220,38,38,0.1); }
+        .login-form .has-error .field-error { display: block; }
 
         .password-wrap { position: relative; }
         .password-wrap input { padding-right: 44px; }
@@ -110,21 +114,23 @@ $assetPath = url('/frontend/assets');
                 <div style="background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;"><?php echo e($_SESSION['success']); unset($_SESSION['success']); ?></div>
             <?php endif; ?>
 
-            <form class="login-form" method="POST" action="<?php echo url('/login'); ?>">
+            <form class="login-form" method="POST" action="<?php echo url('/login'); ?>" novalidate>
                 <?php echo csrf_field(); ?>
-                <div class="form-group">
+                <div class="form-group" id="email-group">
                     <label for="email">Email address</label>
-                    <input type="email" id="email" name="email" placeholder="Enter your email" value="<?php echo e(old('email')); ?>" required autofocus>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" value="<?php echo e(old('email')); ?>" autofocus>
+                    <div class="field-error" id="email-error"></div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="password-group">
                     <label for="password">Password</label>
                     <div class="password-wrap">
-                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <input type="password" id="password" name="password" placeholder="Enter your password">
                         <button type="button" class="password-toggle" onclick="togglePassword()" aria-label="Toggle password visibility">
                             <svg id="eye-off" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12c1.292 4.338 5.31 7.5 10.066 7.5.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
                             <svg id="eye-on" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="display:none;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         </button>
                     </div>
+                    <div class="field-error" id="password-error"></div>
                 </div>
 
                 <div class="login-options">
@@ -162,6 +168,63 @@ $assetPath = url('/frontend/assets');
                 eyeOn.style.display = 'none';
             }
         }
+
+        function setError(id, message) {
+            const group = document.getElementById(id + '-group');
+            const input = document.getElementById(id);
+            const error = document.getElementById(id + '-error');
+            if (message) {
+                error.textContent = message;
+                group.classList.add('has-error');
+                input.classList.add('has-error');
+            } else {
+                error.textContent = '';
+                group.classList.remove('has-error');
+                input.classList.remove('has-error');
+            }
+        }
+
+        function validateLoginForm() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            let valid = true;
+
+            if (email === '') {
+                setError('email', 'Email address is required.');
+                valid = false;
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                setError('email', 'Please enter a valid email address.');
+                valid = false;
+            } else {
+                setError('email', '');
+            }
+
+            if (password === '') {
+                setError('password', 'Password is required.');
+                valid = false;
+            } else {
+                setError('password', '');
+            }
+
+            return valid;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('.login-form');
+            form.addEventListener('submit', function (e) {
+                if (!validateLoginForm()) {
+                    e.preventDefault();
+                }
+            });
+            ['email', 'password'].forEach(function (id) {
+                document.getElementById(id).addEventListener('input', function () {
+                    const group = document.getElementById(id + '-group');
+                    if (group.classList.contains('has-error')) {
+                        validateLoginForm();
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>

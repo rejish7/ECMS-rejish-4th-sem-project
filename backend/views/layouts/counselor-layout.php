@@ -13,7 +13,10 @@ $basePath = rtrim(url('/'), '/');
 
 $counselorSidebarItems = [
     ['label' => 'Dashboard', 'icon' => 'sidebar-dashboard.svg', 'route' => $basePath . '/counselor/dashboard', 'id' => 'dashboard'],
-    ['label' => 'Documents', 'icon' => 'sidebar-documents.svg', 'route' => $basePath . '/counselor/documents', 'id' => 'documents'],
+    ['label' => 'My Students', 'icon' => 'sidebar-students.svg', 'route' => $basePath . '/counselor/students', 'id' => 'students'],
+    ['label' => 'Counseling Sessions', 'icon' => 'sidebar-sessions.svg', 'route' => $basePath . '/counselor/sessions', 'id' => 'sessions'],
+    ['label' => 'Student Documents', 'icon' => 'sidebar-documents.svg', 'route' => $basePath . '/counselor/documents', 'id' => 'documents'],
+    ['label' => 'My Inquiries', 'icon' => 'sidebar-appointments.svg', 'route' => $basePath . '/counselor/inquiries', 'id' => 'inquiries'],
 ];
 
 $pageTitle = $pageTitle ?? 'Counselor Dashboard';
@@ -61,7 +64,7 @@ $user = getUser();
         <div class="dashboard-main">
             <header class="topbar">
                 <div class="topbar__actions" style="margin-left:auto;">
-                    <a href="<?php echo url('/counselor/dashboard'); ?>" class="topbar__profile" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px;cursor:pointer;">
+                    <a href="<?php echo url('/counselor/profile'); ?>" class="topbar__profile" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px;cursor:pointer;">
                         <span><?php echo e($user['name'] ?? 'Counselor'); ?></span>
                         <img src="<?php echo e($topbarImagePath . '/' . $topbarAvatarImage); ?>" alt="Counselor profile picture">
                     </a>

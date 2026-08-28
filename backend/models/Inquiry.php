@@ -59,16 +59,24 @@ class Inquiry {
     }
 
     public function count($filters = []) {
-        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE 1=1";
+        $sql = "SELECT COUNT(*) FROM {$this->table} i LEFT JOIN students st ON i.student_id = st.id WHERE 1=1";
         $params = [];
 
+        if (!empty($filters['search'])) {
+            $sql .= " AND (st.name LIKE ? OR i.inquiry_id LIKE ? OR i.country_of_interest LIKE ?)";
+            $search = "%{$filters['search']}%";
+            $params[] = $search;
+            $params[] = $search;
+            $params[] = $search;
+        }
+
         if (!empty($filters['status'])) {
-            $sql .= " AND status = ?";
+            $sql .= " AND i.status = ?";
             $params[] = $filters['status'];
         }
 
         if (!empty($filters['counselor_id'])) {
-            $sql .= " AND counselor_id = ?";
+            $sql .= " AND i.counselor_id = ?";
             $params[] = $filters['counselor_id'];
         }
 
@@ -111,10 +119,15 @@ class Inquiry {
         $fields = [];
         $params = [];
 
+        $allowed = ['counselor_id', 'status', 'country_of_interest', 'level_of_study', 'message'];
         foreach ($data as $key => $value) {
-            $fields[] = "{$key} = ?";
-            $params[] = $value;
+            if (in_array($key, $allowed)) {
+                $fields[] = "{$key} = ?";
+                $params[] = $value;
+            }
         }
+
+        if (empty($fields)) return false;
 
         $params[] = $id;
         $sql = "UPDATE {$this->table} SET " . implode(', ', $fields) . " WHERE id = ?";
@@ -141,7 +154,7 @@ class Inquiry {
 
     public function hasInquiryForCountry($student_id, $country) {
         $stmt = $this->db->prepare(
-            "SELECT COUNT(*) FROM {$this->table} WHERE student_id = ? AND country_of_interest = ?"
+            "SELECT COUNT(*) FROM {$this->table} WHERE student_id = ? AND country_of_interest = ? AND status != 'closed'"
         );
         $stmt->execute([$student_id, $country]);
         return $stmt->fetchColumn() > 0;
