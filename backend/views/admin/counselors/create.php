@@ -21,6 +21,7 @@
 <div class="form-card">
     <h3>Add New Counselor</h3>
     <form method="POST" action="<?php echo url('/admin/counselors/store'); ?>">
+        <?php echo csrf_field(); ?>
         <div class="form-group"><label>Name</label><input type="text" name="name" required></div>
         <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
         <div class="form-group">

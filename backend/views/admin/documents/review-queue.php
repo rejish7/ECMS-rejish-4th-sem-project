@@ -180,6 +180,7 @@
 
                     <?php if ($selectedDoc['status'] === 'pending'): ?>
                         <form class="rq-review-form" method="POST" action="<?php echo url('/admin/documents/' . $selectedDoc['id'] . '/review'); ?>">
+                            <?php echo csrf_field(); ?>
                             <h4>Review Decision</h4>
                             <div class="rq-radio-group">
                                 <label class="rq-radio">

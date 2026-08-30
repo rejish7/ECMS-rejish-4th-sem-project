@@ -39,6 +39,7 @@ ob_start();
 <div class="card new-inquiry">
     <div class="card__header"><h3>New Inquiry</h3></div>
     <form class="form" method="POST" action="<?php echo url('/student/inquiries/store'); ?>">
+        <?php echo csrf_field(); ?>
         <div class="form-row">
             <div class="form-group">
                 <label>Preferred Study Destination</label>

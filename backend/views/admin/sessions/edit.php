@@ -12,6 +12,7 @@
 <div class="form-card">
     <h3>Edit Session</h3>
     <form method="POST" action="<?php echo url('/admin/sessions/' . $session['id'] . '/update'); ?>">
+        <?php echo csrf_field(); ?>
         <div class="form-group"><label>Student</label><select name="student_id" required><?php foreach ($students as $st): ?><option value="<?php echo e($st['id']); ?>" <?php echo ($session['student_id'] ?? '') == $st['id'] ? 'selected' : ''; ?>><?php echo e($st['name']); ?></option><?php endforeach; ?></select></div>
         <div class="form-group"><label>Counselor</label><select name="counselor_id" required><?php foreach ($counselors as $c): ?><option value="<?php echo e($c['id']); ?>" <?php echo ($session['counselor_id'] ?? '') == $c['id'] ? 'selected' : ''; ?>><?php echo e($c['name']); ?></option><?php endforeach; ?></select></div>
         <div class="form-group"><label>Mode</label><select name="mode"><option value="In-Person" <?php echo ($session['mode'] ?? '') === 'In-Person' ? 'selected' : ''; ?>>In-Person</option><option value="Video Call" <?php echo ($session['mode'] ?? '') === 'Video Call' ? 'selected' : ''; ?>>Video Call</option></select></div>

@@ -21,6 +21,7 @@
     <h3>Edit Document <span class="doc-badge doc-badge--<?php echo e($document['status']); ?>"><?php echo e(ucfirst($document['status'])); ?></span></h3>
     <?php $docId = $document['id']; ?>
     <form method="POST" action="<?php echo url('/admin/documents/' . $docId . '/update'); ?>">
+        <?php echo csrf_field(); ?>
         <div class="form-group">
             <label>Student</label>
             <input type="text" value="<?php echo e($document['student_name'] ?? 'Unknown'); ?> (<?php echo e($document['student_code'] ?? 'N/A'); ?>)" disabled style="background:#f3f4f6;">

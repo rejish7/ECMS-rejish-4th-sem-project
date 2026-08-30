@@ -15,6 +15,7 @@
 <div class="form-card">
     <h3>Edit College</h3>
     <form method="POST" action="<?php echo url('/admin/catalog/college/' . $college['id'] . '/update'); ?>">
+        <?php echo csrf_field(); ?>
         <div class="form-row">
             <div class="form-group">
                 <label>College Name *</label>

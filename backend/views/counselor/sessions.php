@@ -85,6 +85,7 @@ ob_start();
                             <td>
                                 <?php if (in_array($s['status'] ?? '', ['scheduled', 'in-progress'], true)): ?>
                                     <form method="POST" action="<?php echo url('/counselor/sessions/' . $s['id'] . '/status'); ?>" class="ses-actions">
+                                        <?php echo csrf_field(); ?>
                                         <select name="status" class="ses-status-select">
                                             <option value="in-progress" <?php echo ($s['status'] ?? '') === 'in-progress' ? 'selected' : ''; ?>>In Progress</option>
                                             <option value="completed">Completed</option>

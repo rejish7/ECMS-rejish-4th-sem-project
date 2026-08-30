@@ -12,6 +12,7 @@
 <div class="form-card">
     <h3>Add New User</h3>
     <form method="POST" action="<?php echo url('/admin/users/store'); ?>">
+        <?php echo csrf_field(); ?>
         <div class="form-group"><label>User ID</label><input type="text" name="user_id" required></div>
         <div class="form-group"><label>Name</label><input type="text" name="name" required></div>
         <div class="form-group"><label>Email</label><input type="email" name="email" required></div>

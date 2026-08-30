@@ -52,14 +52,19 @@
     <div class="detail-actions">
         <?php if (($inquiry['status'] ?? '') !== 'closed'): ?>
             <form method="POST" action="<?php echo url('/admin/inquiries/' . $inquiry['id'] . '/close'); ?>" style="display:inline;" onsubmit="return confirm('Mark this inquiry as closed? The student will be able to submit a new inquiry for this country.')">
+                <?php echo csrf_field(); ?>
                 <button type="submit" class="btn-close">Mark as Closed</button>
             </form>
         <?php endif; ?>
         <button type="button" class="btn-primary" onclick="document.getElementById('assignModal').classList.add('active')">Assign Counselor</button>
         <form method="POST" action="<?php echo url('/admin/inquiries/' . $inquiry['id'] . '/auto-assign'); ?>" style="display:inline;" onsubmit="return confirm('Auto-assign to least busy counselor?')">
+            <?php echo csrf_field(); ?>
             <button type="submit" class="btn-auto">Auto-Assign</button>
         </form>
-        <form method="POST" action="<?php echo url('/admin/inquiries/' . $inquiry['id'] . '/delete'); ?>" onsubmit="return confirm('Are you sure you want to delete this inquiry?')"><button type="submit" class="btn-danger">Delete</button></form>
+        <form method="POST" action="<?php echo url('/admin/inquiries/' . $inquiry['id'] . '/delete'); ?>" onsubmit="return confirm('Are you sure you want to delete this inquiry?')">
+            <?php echo csrf_field(); ?>
+            <button type="submit" class="btn-danger">Delete</button>
+        </form>
         <a href="<?php echo url('/admin/inquiries'); ?>" class="btn-secondary">Back to List</a>
     </div>
 </div>
@@ -74,6 +79,7 @@
             </button>
         </div>
         <form id="assignForm" method="POST" action="<?php echo url('/admin/inquiries/' . $inquiry['id'] . '/assign'); ?>">
+            <?php echo csrf_field(); ?>
             <div class="modal-body">
                 <p style="margin:0 0 16px;font-size:13px;color:#73777f;">Assign a counselor to this inquiry</p>
                 <label for="counselor_id">Select Counselor</label>

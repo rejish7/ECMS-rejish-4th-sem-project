@@ -89,6 +89,11 @@ class InquiryController extends Controller {
             $this->redirect(url('/admin/inquiries'));
         }
 
+        if (!empty($inquiry['counselor_id'])) {
+            flash('error', 'This inquiry is already assigned to a counselor. Please remove the current assignment first before auto-assigning.');
+            $this->redirect(url('/admin/inquiries/' . $id));
+        }
+
         $counselor = $this->counselorModel->getLeastBusy();
         if (!$counselor) {
             flash('error', 'No available counselors found.');

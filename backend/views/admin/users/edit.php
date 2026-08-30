@@ -12,6 +12,7 @@
 <div class="form-card">
     <h3>Edit User</h3>
     <form method="POST" action="<?php echo url('/admin/users/' . $user['id'] . '/update'); ?>">
+        <?php echo csrf_field(); ?>
         <div class="form-group"><label>Name</label><input type="text" name="name" value="<?php echo e($user['name']); ?>" required></div>
         <div class="form-group"><label>Email</label><input type="email" name="email" value="<?php echo e($user['email']); ?>" required></div>
         <div class="form-group"><label>Password (leave blank to keep current)</label><input type="password" name="password"></div>

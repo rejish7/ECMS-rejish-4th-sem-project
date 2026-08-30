@@ -13,6 +13,7 @@
 <div class="form-card">
     <h3>Edit Counselor</h3>
     <form method="POST" action="<?php echo url('/admin/counselors/' . $counselor['id'] . '/update'); ?>">
+        <?php echo csrf_field(); ?>
         <div class="form-group"><label>Name</label><input type="text" name="name" value="<?php echo e($counselor['name']); ?>" required></div>
         <div class="form-group"><label>Email</label><input type="email" name="email" value="<?php echo e($counselor['email']); ?>" required></div>
         <div class="form-group">

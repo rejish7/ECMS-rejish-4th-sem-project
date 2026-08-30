@@ -85,6 +85,7 @@ ob_start();
     <div class="detail-actions">
         <a href="<?php echo url('/admin/students/' . $student['id'] . '/edit'); ?>" class="btn-primary">Edit</a>
         <form method="POST" action="<?php echo url('/admin/students/' . $student['id'] . '/delete'); ?>" onsubmit="return confirm('Are you sure?')">
+            <?php echo csrf_field(); ?>
             <button type="submit" class="btn-danger">Delete</button>
         </form>
         <a href="<?php echo url('/admin/students'); ?>" class="btn-secondary">Back to List</a>

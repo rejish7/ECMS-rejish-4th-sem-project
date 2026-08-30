@@ -8,6 +8,11 @@ function url($path = '') {
     return $base . '/' . ltrim($path, '/');
 }
 
+function redirect($url) {
+    header("Location: " . $url);
+    exit;
+}
+
 function old($key, $default = '') {
     return $_SESSION['old'][$key] ?? $default;
 }

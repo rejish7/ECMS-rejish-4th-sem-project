@@ -18,6 +18,7 @@ ob_start();
 <div class="form-card">
     <h3>Schedule New Session</h3>
     <form method="POST" action="<?php echo url('/counselor/sessions/store'); ?>">
+        <?php echo csrf_field(); ?>
         <div class="form-group">
             <label>Student</label>
             <select name="student_id" required>

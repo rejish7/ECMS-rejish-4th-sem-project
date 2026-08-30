@@ -16,6 +16,7 @@
 <div class="form-card">
     <h3>Add Course</h3>
     <form method="POST" action="<?php echo url('/admin/catalog/course/store'); ?>">
+        <?php echo csrf_field(); ?>
         <div class="form-group">
             <label>College *</label>
             <select name="college_id" required>

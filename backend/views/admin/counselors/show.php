@@ -19,7 +19,10 @@
     <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value"><?php echo e($counselor['status'] ?? 'available'); ?></span></div>
     <div class="detail-actions">
         <a href="<?php echo url('/admin/counselors/' . $counselor['id'] . '/edit'); ?>" class="btn-primary">Edit</a>
-        <form method="POST" action="<?php echo url('/admin/counselors/' . $counselor['id'] . '/delete'); ?>" onsubmit="return confirm('Are you sure?')"><button type="submit" class="btn-danger">Delete</button></form>
+        <form method="POST" action="<?php echo url('/admin/counselors/' . $counselor['id'] . '/delete'); ?>" onsubmit="return confirm('Are you sure?')">
+            <?php echo csrf_field(); ?>
+            <button type="submit" class="btn-danger">Delete</button>
+        </form>
         <a href="<?php echo url('/admin/counselors'); ?>" class="btn-secondary">Back to List</a>
     </div>
 </div>

@@ -88,6 +88,7 @@ ob_start();
                         </div>
 
                         <form class="submit-form" method="POST" action="<?php echo url('/student/documents/' . $doc['id'] . '/submit'); ?>" enctype="multipart/form-data">
+                            <?php echo csrf_field(); ?>
                             <input class="file-input" type="file" name="file" required accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg">
                             <button class="submit-btn" type="submit"><?php echo $doc['status'] === 'resubmit' ? 'Resubmit' : 'Submit'; ?></button>
                         </form>

@@ -16,6 +16,7 @@
 <div class="form-card">
     <h3>Upload Document</h3>
     <form method="POST" action="<?php echo url('/admin/documents/store'); ?>" enctype="multipart/form-data">
+        <?php echo csrf_field(); ?>
         <div class="form-group">
             <label>Student</label>
             <select name="student_id" required>

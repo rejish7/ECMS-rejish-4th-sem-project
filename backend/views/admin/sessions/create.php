@@ -13,6 +13,7 @@
 <div class="form-card">
     <h3>Schedule New Session</h3>
     <form method="POST" action="<?php echo url('/admin/sessions/store'); ?>">
+        <?php echo csrf_field(); ?>
         <div class="form-group"><label>Session ID</label><input type="text" name="session_id" required></div>
         <div class="form-group"><label>Student</label><select name="student_id" required><option value="">Select student</option><?php foreach ($students as $st): ?><option value="<?php echo e($st['id']); ?>"><?php echo e($st['name']); ?></option><?php endforeach; ?></select></div>
         <div class="form-group"><label>Counselor</label><select name="counselor_id" required><option value="">Select counselor</option><?php foreach ($counselors as $c): ?><option value="<?php echo e($c['id']); ?>"><?php echo e($c['name']); ?></option><?php endforeach; ?></select></div>

@@ -55,6 +55,7 @@ ob_start();
     <div class="card">
         <div class="card__header"><h3>Change Password</h3></div>
         <form class="form" method="POST" action="<?php echo url('/counselor/profile/password'); ?>">
+            <?php echo csrf_field(); ?>
             <div class="form-group">
                 <label>Current Password</label>
                 <input type="password" name="current_password" required>

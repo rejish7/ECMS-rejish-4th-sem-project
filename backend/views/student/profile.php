@@ -30,6 +30,7 @@ ob_start();
     <div class="card">
         <div class="card__header"><h3>Profile Details</h3></div>
         <form class="form" method="POST" action="<?php echo url('/student/profile/update'); ?>">
+            <?php echo csrf_field(); ?>
             <div class="form-group">
                 <label>Student ID</label>
                 <input type="text" value="<?php echo e($student['student_id'] ?? '-'); ?>" readonly>
@@ -59,6 +60,7 @@ ob_start();
     <div class="card">
         <div class="card__header"><h3>Change Password</h3></div>
         <form class="form" method="POST" action="<?php echo url('/student/profile/password'); ?>">
+            <?php echo csrf_field(); ?>
             <div class="form-group">
                 <label>Current Password</label>
                 <input type="password" name="current_password" required>

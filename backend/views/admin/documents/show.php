@@ -108,7 +108,10 @@
         <?php if ($document['status'] === 'pending'): ?>
             <a href="<?php echo url('/admin/documents/' . $document['id'] . '/edit'); ?>" class="btn-primary">Edit</a>
         <?php endif; ?>
-        <form method="POST" action="<?php echo url('/admin/documents/' . $document['id'] . '/delete'); ?>" onsubmit="return confirm('Are you sure?')"><button type="submit" class="btn-danger">Delete</button></form>
+        <form method="POST" action="<?php echo url('/admin/documents/' . $document['id'] . '/delete'); ?>" onsubmit="return confirm('Are you sure?')">
+            <?php echo csrf_field(); ?>
+            <button type="submit" class="btn-danger">Delete</button>
+        </form>
         <a href="<?php echo url('/admin/documents'); ?>" class="btn-secondary">Back to List</a>
     </div>
 </div>

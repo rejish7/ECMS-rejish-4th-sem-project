@@ -92,6 +92,7 @@
                                 <td>
                                     <?php if (in_array($doc['status'] ?? '', ['pending', 'resubmit'], true)): ?>
                                         <form class="doc-review" method="POST" action="<?php echo url('/counselor/documents/' . $doc['id'] . '/review'); ?>">
+                                            <?php echo csrf_field(); ?>
                                             <div class="doc-review-top">
                                                 <select name="status" required>
                                                     <option value="">Review&hellip;</option>

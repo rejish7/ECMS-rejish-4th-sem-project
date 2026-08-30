@@ -24,6 +24,7 @@ ob_start();
 <div class="form-card">
     <h3>Register New Student</h3>
     <form method="POST" action="<?php echo url('/admin/students/store'); ?>">
+        <?php echo csrf_field(); ?>
         <div class="form-group">
             <label for="student_id">Student ID</label>
             <input type="text" id="student_id" name="student_id" required>

@@ -15,6 +15,7 @@
 <div class="form-card">
     <h3>Assign Required Document</h3>
     <form method="POST" action="<?php echo url('/counselor/documents/assign/store'); ?>">
+        <?php echo csrf_field(); ?>
         <div class="form-group">
             <label>Student</label>
             <select name="student_id" required>
