@@ -28,14 +28,16 @@
         </div>
         <div class="form-group">
             <label>Document Name</label>
-            <input type="text" name="name" value="<?php echo e($document['name']); ?>" required>
+            <input type="text" name="name" value="<?php echo e($document['name']); ?>">
+            <?php if (!empty($_SESSION['errors']['name'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['name']); ?></div><?php endif; ?>
         </div>
         <div class="form-group">
             <label>Category</label>
-            <select name="category" required>
+            <select name="category">
                 <option value="education" <?php echo $document['category'] === 'education' ? 'selected' : ''; ?>>Education Documents</option>
                 <option value="visa" <?php echo $document['category'] === 'visa' ? 'selected' : ''; ?>>Visa Documents</option>
             </select>
+            <?php if (!empty($_SESSION['errors']['category'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['category']); ?></div><?php endif; ?>
         </div>
         <div class="form-group">
             <label>Description</label>
@@ -45,6 +47,7 @@
             <button type="submit" class="btn-primary">Update</button>
             <a href="<?php echo url('/admin/documents'); ?>" class="btn-secondary">Cancel</a>
         </div>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
     </form>
 </div>
 <?php $content = ob_get_clean(); include __DIR__ . '/../../layouts/admin-layout.php';

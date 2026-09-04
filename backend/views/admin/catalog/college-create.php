@@ -19,17 +19,20 @@
         <div class="form-row">
             <div class="form-group">
                 <label>College Name *</label>
-                <input type="text" name="name" required placeholder="e.g., London University">
+                <input type="text" name="name" placeholder="e.g., London University">
+                <?php if (!empty($_SESSION['errors']['name'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['name']); ?></div><?php endif; ?>
             </div>
             <div class="form-group">
                 <label>Code *</label>
-                <input type="text" name="code" required placeholder="e.g., LU" maxlength="20">
+                <input type="text" name="code" placeholder="e.g., LU" maxlength="20">
+                <?php if (!empty($_SESSION['errors']['code'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['code']); ?></div><?php endif; ?>
             </div>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label>Country *</label>
-                <input type="text" name="country" required placeholder="e.g., United Kingdom">
+                <input type="text" name="country" placeholder="e.g., United Kingdom">
+                <?php if (!empty($_SESSION['errors']['country'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['country']); ?></div><?php endif; ?>
             </div>
             <div class="form-group">
                 <label>City</label>
@@ -63,6 +66,7 @@
             <button type="submit" class="btn-primary">Add College</button>
             <a href="<?php echo url('/admin/catalog'); ?>" class="btn-secondary">Cancel</a>
         </div>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
     </form>
 </div>
 <?php $content = ob_get_clean(); include __DIR__ . '/../../layouts/admin-layout.php';

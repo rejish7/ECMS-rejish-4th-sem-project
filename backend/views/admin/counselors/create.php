@@ -22,16 +22,17 @@
     <h3>Add New Counselor</h3>
     <form method="POST" action="<?php echo url('/admin/counselors/store'); ?>">
         <?php echo csrf_field(); ?>
-        <div class="form-group"><label>Name</label><input type="text" name="name" required></div>
-        <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
+        <div class="form-group"><label>Name</label><input type="text" name="name"><?php if (!empty($_SESSION['errors']['name'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['name']); ?></div><?php endif; ?></div>
+        <div class="form-group"><label>Email</label><input type="email" name="email"><?php if (!empty($_SESSION['errors']['email'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['email']); ?></div><?php endif; ?></div>
         <div class="form-group">
             <label>Specialization</label>
-            <select name="specialization" required>
+            <select name="specialization">
                 <option value="">Select specialization</option>
                 <option value="Undergraduate">Undergraduate</option>
                 <option value="Postgraduate">Postgraduate</option>
                 <option value="Visa Counseling">Visa Counseling</option>
             </select>
+            <?php if (!empty($_SESSION['errors']['specialization'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['specialization']); ?></div><?php endif; ?>
         </div>
         <div class="form-group"><label>Max Students</label><input type="number" name="max_students" value="50"></div>
         <div class="form-group">
@@ -57,6 +58,7 @@
             <button type="submit" class="btn-primary">Add Counselor</button>
             <a href="<?php echo url('/admin/counselors'); ?>" class="btn-secondary">Cancel</a>
         </div>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
     </form>
 </div>
 

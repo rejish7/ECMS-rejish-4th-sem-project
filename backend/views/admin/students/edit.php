@@ -20,23 +20,27 @@ ob_start();
         <?php echo csrf_field(); ?>
         <div class="form-group">
             <label for="student_id">Student ID</label>
-            <input type="text" id="student_id" name="student_id" value="<?php echo e($student['student_id']); ?>" required>
+            <input type="text" id="student_id" name="student_id" value="<?php echo e($student['student_id']); ?>">
+            <?php if (!empty($_SESSION['errors']['student_id'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['student_id']); ?></div><?php endif; ?>
         </div>
         <div class="form-group">
             <label for="name">Full Name</label>
-            <input type="text" id="name" name="name" value="<?php echo e($student['name']); ?>" required>
+            <input type="text" id="name" name="name" value="<?php echo e($student['name']); ?>">
+            <?php if (!empty($_SESSION['errors']['name'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['name']); ?></div><?php endif; ?>
         </div>
         <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" id="email" name="email" value="<?php echo e($student['email']); ?>" required>
+            <input type="email" id="email" name="email" value="<?php echo e($student['email']); ?>">
+            <?php if (!empty($_SESSION['errors']['email'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['email']); ?></div><?php endif; ?>
         </div>
         <div class="form-group">
             <label for="education_level">Education Level</label>
-            <select id="education_level" name="education_level" required>
+            <select id="education_level" name="education_level">
                 <option value="High School" <?php echo ($student['education_level'] ?? '') === 'High School' ? 'selected' : ''; ?>>High School</option>
                 <option value="Undergraduate" <?php echo ($student['education_level'] ?? '') === 'Undergraduate' ? 'selected' : ''; ?>>Undergraduate</option>
                 <option value="Postgraduate" <?php echo ($student['education_level'] ?? '') === 'Postgraduate' ? 'selected' : ''; ?>>Postgraduate</option>
             </select>
+            <?php if (!empty($_SESSION['errors']['education_level'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['education_level']); ?></div><?php endif; ?>
         </div>
         <div class="form-group">
             <label for="counselor_id">Assigned Counselor</label>
@@ -55,6 +59,7 @@ ob_start();
             <button type="submit" class="btn-primary">Update Student</button>
             <a href="<?php echo url('/admin/students'); ?>" class="btn-secondary">Cancel</a>
         </div>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
     </form>
 </div>
 <?php

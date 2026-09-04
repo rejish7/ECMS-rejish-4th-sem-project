@@ -47,6 +47,33 @@ class UserController extends Controller {
         }
 
         $data = $this->sanitize($this->getInput());
+
+        $errors = [];
+        if (empty($data['name'])) {
+            $errors['name'] = 'Full name is required.';
+        }
+        if (empty($data['email'])) {
+            $errors['email'] = 'Email address is required.';
+        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Please enter a valid email address.';
+        }
+        if (empty($data['password'])) {
+            $errors['password'] = 'Password is required.';
+        } elseif (strlen($data['password']) < 8) {
+            $errors['password'] = 'Password must be at least 8 characters.';
+        }
+        $allowedRoles = ['admin', 'counselor', 'student'];
+        if (empty($data['role']) || !in_array($data['role'], $allowedRoles, true)) {
+            $errors['role'] = 'Please select a valid role.';
+        }
+
+        if ($errors) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
+            $_SESSION['old'] = $data;
+            $this->redirect(url('/admin/users/create'));
+        }
+
         $this->userModel->create($data);
 
         flash('success', 'User created successfully.');
@@ -87,6 +114,32 @@ class UserController extends Controller {
         }
 
         $data = $this->sanitize($this->getInput());
+
+        $errors = [];
+        if (empty($data['name'])) {
+            $errors['name'] = 'Full name is required.';
+        }
+        if (empty($data['email'])) {
+            $errors['email'] = 'Email address is required.';
+        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Please enter a valid email address.';
+        }
+        $allowedRoles = ['admin', 'counselor', 'student'];
+        if (!empty($data['role']) && !in_array($data['role'], $allowedRoles, true)) {
+            $errors['role'] = 'Please select a valid role.';
+        }
+        $allowedStatuses = ['active', 'inactive'];
+        if (!empty($data['status']) && !in_array($data['status'], $allowedStatuses, true)) {
+            $errors['status'] = 'Please select a valid status.';
+        }
+
+        if ($errors) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
+            $_SESSION['old'] = $data;
+            $this->redirect(url('/admin/users/' . $id . '/edit'));
+        }
+
         $this->userModel->update($id, $data);
 
         flash('success', 'User updated successfully.');

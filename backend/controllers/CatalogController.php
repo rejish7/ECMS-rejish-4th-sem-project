@@ -66,8 +66,21 @@ class CatalogController extends Controller {
 
         $data = $this->sanitize($this->getInput());
 
-        if (empty($data['name']) || empty($data['code']) || empty($data['country'])) {
-            flash('error', 'Name, code, and country are required.');
+        $errors = [];
+        if (empty($data['name'])) {
+            $errors['name'] = 'College name is required.';
+        }
+        if (empty($data['code'])) {
+            $errors['code'] = 'College code is required.';
+        }
+        if (empty($data['country'])) {
+            $errors['country'] = 'Country is required.';
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['old'] = $data;
+            flash('error', 'Please fix the errors below.');
             $this->redirect(url('/admin/catalog/college/create'));
         }
 
@@ -96,6 +109,24 @@ class CatalogController extends Controller {
         }
 
         $data = $this->sanitize($this->getInput());
+
+        $errors = [];
+        if (empty($data['name'])) {
+            $errors['name'] = 'College name is required.';
+        }
+        if (empty($data['code'])) {
+            $errors['code'] = 'College code is required.';
+        }
+        if (empty($data['country'])) {
+            $errors['country'] = 'Country is required.';
+        }
+
+        if ($errors) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
+            $this->redirect(url('/admin/catalog/college/' . $id . '/edit'));
+        }
+
         $this->collegeModel->update($id, $data);
         flash('success', 'College updated successfully.');
         $this->redirect(url('/admin/catalog'));
@@ -129,8 +160,27 @@ class CatalogController extends Controller {
 
         $data = $this->sanitize($this->getInput());
 
-        if (empty($data['name']) || empty($data['code']) || empty($data['college_id']) || empty($data['level']) || empty($data['duration'])) {
-            flash('error', 'All required fields must be filled.');
+        $errors = [];
+        if (empty($data['name'])) {
+            $errors['name'] = 'Course name is required.';
+        }
+        if (empty($data['code'])) {
+            $errors['code'] = 'Course code is required.';
+        }
+        if (empty($data['college_id'])) {
+            $errors['college_id'] = 'College is required.';
+        }
+        if (!empty($data['level']) && !in_array($data['level'], ['bachelor', 'master', 'diploma', 'phd'], true)) {
+            $errors['level'] = 'Please select a valid course level.';
+        }
+        if (empty($data['duration'])) {
+            $errors['duration'] = 'Duration is required.';
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['old'] = $data;
+            flash('error', 'Please fix the errors below.');
             $this->redirect(url('/admin/catalog/course/create'));
         }
 
@@ -162,6 +212,28 @@ class CatalogController extends Controller {
         }
 
         $data = $this->sanitize($this->getInput());
+
+        $errors = [];
+        if (empty($data['name'])) {
+            $errors['name'] = 'Course name is required.';
+        }
+        if (empty($data['code'])) {
+            $errors['code'] = 'Course code is required.';
+        }
+        if (empty($data['college_id'])) {
+            $errors['college_id'] = 'Please select a college.';
+        }
+        $allowedLevels = ['bachelor', 'master', 'diploma', 'phd'];
+        if (!empty($data['level']) && !in_array($data['level'], $allowedLevels, true)) {
+            $errors['level'] = 'Please select a valid level.';
+        }
+
+        if ($errors) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
+            $this->redirect(url('/admin/catalog/course/' . $id . '/edit'));
+        }
+
         $this->courseModel->update($id, $data);
         flash('success', 'Course updated successfully.');
         $this->redirect(url('/admin/catalog'));

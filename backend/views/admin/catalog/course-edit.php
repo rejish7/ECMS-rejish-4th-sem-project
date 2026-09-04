@@ -19,7 +19,7 @@
         <?php echo csrf_field(); ?>
         <div class="form-group">
             <label>College *</label>
-            <select name="college_id" required>
+            <select name="college_id">
                 <option value="">Select College</option>
                 <?php if (!empty($colleges)): ?>
                     <?php foreach ($colleges as $college): ?>
@@ -27,30 +27,35 @@
                     <?php endforeach; ?>
                 <?php endif; ?>
             </select>
+            <?php if (!empty($_SESSION['errors']['college_id'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['college_id']); ?></div><?php endif; ?>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label>Course Name *</label>
-                <input type="text" name="name" value="<?php echo e($course['name']); ?>" required>
+                <input type="text" name="name" value="<?php echo e($course['name']); ?>">
+                <?php if (!empty($_SESSION['errors']['name'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['name']); ?></div><?php endif; ?>
             </div>
             <div class="form-group">
                 <label>Course Code *</label>
-                <input type="text" name="code" value="<?php echo e($course['code']); ?>" required maxlength="20">
+                <input type="text" name="code" value="<?php echo e($course['code']); ?>" maxlength="20">
+                <?php if (!empty($_SESSION['errors']['code'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['code']); ?></div><?php endif; ?>
             </div>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label>Level *</label>
-                <select name="level" required>
+                <select name="level">
                     <option value="bachelor" <?php echo $course['level'] === 'bachelor' ? 'selected' : ''; ?>>Bachelor</option>
                     <option value="master" <?php echo $course['level'] === 'master' ? 'selected' : ''; ?>>Master</option>
                     <option value="diploma" <?php echo $course['level'] === 'diploma' ? 'selected' : ''; ?>>Diploma</option>
                     <option value="phd" <?php echo $course['level'] === 'phd' ? 'selected' : ''; ?>>PhD</option>
                 </select>
+                <?php if (!empty($_SESSION['errors']['level'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['level']); ?></div><?php endif; ?>
             </div>
             <div class="form-group">
                 <label>Duration *</label>
-                <input type="text" name="duration" value="<?php echo e($course['duration']); ?>" required>
+                <input type="text" name="duration" value="<?php echo e($course['duration']); ?>">
+                <?php if (!empty($_SESSION['errors']['duration'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['duration']); ?></div><?php endif; ?>
             </div>
         </div>
         <div class="form-row">
@@ -89,6 +94,7 @@
             <button type="submit" class="btn-primary">Update Course</button>
             <a href="<?php echo url('/admin/catalog'); ?>" class="btn-secondary">Cancel</a>
         </div>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
     </form>
 </div>
 <?php $content = ob_get_clean(); include __DIR__ . '/../../layouts/admin-layout.php';

@@ -16,6 +16,7 @@ $studentSidebarItems = [
     ['label' => 'My Sessions', 'icon' => 'sidebar-sessions.svg', 'route' => $basePath . '/student/sessions', 'id' => 'sessions'],
     ['label' => 'My Documents', 'icon' => 'sidebar-documents.svg', 'route' => $basePath . '/student/documents', 'id' => 'documents'],
     ['label' => 'My Inquiries', 'icon' => 'sidebar-appointments.svg', 'route' => $basePath . '/student/inquiries', 'id' => 'inquiries'],
+    ['label' => 'College Catalog', 'icon' => 'sidebar-counselors.svg', 'route' => $basePath . '/student/catalog', 'id' => 'catalog'],
 ];
 
 $pageTitle = $pageTitle ?? 'Student Dashboard';
@@ -63,9 +64,17 @@ $user = getUser();
         <div class="dashboard-main">
             <header class="topbar">
                 <div class="topbar__actions" style="margin-left:auto;">
+                    <?php include VIEW_PATH . '/partials/notification-bell.php'; ?>
+
                     <a href="<?php echo url('/student/profile'); ?>" class="topbar__profile" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px;cursor:pointer;">
+                        <?php
+                        $studentAvatar = $user['avatar'] ?? '';
+                        if (!empty($studentAvatar)): ?>
+                            <img src="<?php echo e($studentAvatar); ?>" alt="Student profile" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+                        <?php else: ?>
+                            <img src="<?php echo e($topbarImagePath . '/' . $topbarAvatarImage); ?>" alt="Student profile picture">
+                        <?php endif; ?>
                         <span><?php echo e($user['name'] ?? 'Student'); ?></span>
-                        <img src="<?php echo e($topbarImagePath . '/' . $topbarAvatarImage); ?>" alt="Student profile picture">
                     </a>
                 </div>
             </header>

@@ -1739,3 +1739,92 @@ a {
         gap: 1rem;
     }
 }
+
+/* Notifications */
+.notif-bell { position: relative; }
+.notif-badge {
+    position: absolute; top: 2px; right: 2px;
+    background: #dc2626; color: #fff; font-size: 10px; font-weight: 700;
+    min-width: 16px; height: 16px; border-radius: 9999px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 4px; line-height: 1;
+}
+.notif-panel {
+    position: absolute; top: 100%; right: 0; margin-top: 8px;
+    width: 360px; max-height: 480px; background: #fff;
+    border: 1px solid #e5e7eb; border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12); z-index: 1000;
+    overflow: hidden;
+}
+.notif-panel__header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid #e5e7eb;
+}
+.notif-panel__header h4 { margin: 0; font-size: 15px; font-weight: 700; color: #0b1c30; }
+.notif-mark-all {
+    background: none; border: none; color: #0054cb; font-size: 13px;
+    font-weight: 500; cursor: pointer; padding: 0;
+}
+.notif-mark-all:hover { text-decoration: underline; }
+.notif-panel__list {
+    max-height: 420px; overflow-y: auto;
+}
+.notif-empty { padding: 32px 20px; text-align: center; color: #9ca3af; font-size: 14px; }
+.notif-item {
+    padding: 14px 20px; border-bottom: 1px solid #f3f4f6; cursor: pointer;
+    transition: background 0.15s;
+}
+.notif-item:hover { background: #f9fafb; }
+.notif-item--unread { background: #f0f7ff; }
+.notif-item--unread:hover { background: #e6f0ff; }
+.notif-item__title { font-size: 13px; font-weight: 600; color: #0b1c30; margin-bottom: 2px; }
+.notif-item__msg { font-size: 12px; color: #73777f; line-height: 1.4; }
+.notif-item__time { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+
+/* Calendar */
+.cal-wrap { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; }
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.cal-header h4 { margin: 0; font-size: 16px; font-weight: 700; color: #0b1c30; }
+.cal-nav { display: flex; gap: 4px; }
+.cal-nav button {
+    width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e5e7eb;
+    background: #fff; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; font-size: 14px; color: #43474f;
+}
+.cal-nav button:hover { background: #f3f4f6; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+.cal-grid__day-name {
+    font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase;
+    padding: 6px 0; letter-spacing: 0.5px;
+}
+.cal-grid__day {
+    padding: 8px 4px; font-size: 13px; color: #43474f; border-radius: 8px;
+    cursor: pointer; position: relative; transition: background 0.15s;
+}
+.cal-grid__day:hover { background: #f3f4f6; }
+.cal-grid__day--empty { cursor: default; }
+.cal-grid__day--empty:hover { background: transparent; }
+.cal-grid__day--today { background: #0054cb; color: #fff; font-weight: 600; }
+.cal-grid__day--today:hover { background: #004aaf; }
+.cal-grid__day--selected { background: #e0edff; color: #0054cb; font-weight: 600; }
+.cal-grid__day--has-session::after {
+    content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+    width: 5px; height: 5px; border-radius: 50%; background: #0054cb;
+}
+.cal-grid__day--today.cal-grid__day--has-session::after { background: #fff; }
+.cal-grid__day--disabled { color: #d1d5db; cursor: not-allowed; }
+.cal-grid__day--disabled:hover { background: transparent; }
+.cal-selected-date { margin-top: 12px; font-size: 13px; color: #73777f; }
+.cal-selected-date strong { color: #0b1c30; }
+
+/* Profile avatar upload */
+.profile-avatar-wrap { position: relative; width: 80px; height: 80px; cursor: pointer; }
+.profile-avatar-wrap img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb; }
+.profile-avatar-wrap .avatar-edit-overlay {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: rgba(0,0,0,0.4); display: flex; align-items: center;
+    justify-content: center; opacity: 0; transition: opacity 0.2s;
+}
+.profile-avatar-wrap:hover .avatar-edit-overlay { opacity: 1; }
+.profile-avatar-wrap .avatar-edit-overlay svg { width: 24px; height: 24px; color: #fff; }
+.form-error{font-size:12px;color:#dc2626;margin-top:4px}

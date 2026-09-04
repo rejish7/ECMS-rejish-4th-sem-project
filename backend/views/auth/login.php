@@ -137,7 +137,7 @@ $assetPath = url('/frontend/assets');
                     <label class="remember-check">
                         <input type="checkbox" name="remember"> Remember for 30 days
                     </label>
-                    <a href="#" class="forgot-link">Forgot password?</a>
+                    <a href="<?php echo url('/forgot-password'); ?>" class="forgot-link">Forgot password?</a>
                 </div>
 
                 <button type="submit" class="btn-signin">Sign in</button>

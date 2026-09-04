@@ -171,7 +171,7 @@ ob_start();
                             <span class="db-avatar"><?php echo e(strtoupper(substr($s['student_name'] ?? '?', 0, 2))); ?></span>
                             <div class="db-session-info">
                                 <div class="db-session-info__name"><?php echo e($s['student_name'] ?? '-'); ?></div>
-                                <div class="db-session-info__date"><?php echo e(date('D, M j', strtotime($s['datetime']))); ?></div>
+                                <div class="db-session-info__date"><?php echo e($s['subject'] ?? date('D, M j', strtotime($s['datetime']))); ?></div>
                             </div>
                             <div class="db-session-meta">
                                 <span class="db-session-time"><?php echo e(date('g:i A', strtotime($s['datetime']))); ?></span>

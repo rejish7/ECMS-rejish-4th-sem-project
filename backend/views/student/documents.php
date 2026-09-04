@@ -89,8 +89,10 @@ ob_start();
 
                         <form class="submit-form" method="POST" action="<?php echo url('/student/documents/' . $doc['id'] . '/submit'); ?>" enctype="multipart/form-data">
                             <?php echo csrf_field(); ?>
-                            <input class="file-input" type="file" name="file" required accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg">
+                            <input class="file-input" type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg">
+                            <?php if (!empty($_SESSION['errors']['file'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['file']); ?></div><?php endif; ?>
                             <button class="submit-btn" type="submit"><?php echo $doc['status'] === 'resubmit' ? 'Resubmit' : 'Submit'; ?></button>
+                            <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
                         </form>
                     <?php else: ?>
                         <?php if ($fileUrl !== '' && $fileExists && $isPdf): ?>

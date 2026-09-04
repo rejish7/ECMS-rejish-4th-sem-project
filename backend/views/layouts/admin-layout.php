@@ -71,13 +71,17 @@ $pageDescription = $pageDescription ?? '';
                 </label>
 
                 <div class="topbar__actions">
-                    <button type="button" class="icon-button icon-button--topbar" aria-label="Notifications">
-                        <img src="<?php echo e($topbarImagePath . '/' . $topbarNotificationIcon); ?>" alt="">
-                    </button>
+                    <?php include VIEW_PATH . '/partials/notification-bell.php'; ?>
 
                     <a href="<?php echo url('/admin/profile'); ?>" class="topbar__profile" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px;cursor:pointer;">
+                        <?php
+                        $adminAvatar = $_SESSION['user']['avatar'] ?? '';
+                        if ($adminAvatar): ?>
+                            <img src="<?php echo e($adminAvatar); ?>" alt="Admin profile" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+                        <?php else: ?>
+                            <img src="<?php echo e($topbarImagePath . '/' . $topbarAvatarImage); ?>" alt="Admin User profile picture">
+                        <?php endif; ?>
                         <span><?php echo e($_SESSION['user']['name'] ?? 'Admin User'); ?></span>
-                        <img src="<?php echo e($topbarImagePath . '/' . $topbarAvatarImage); ?>" alt="Admin User profile picture">
                     </a>
                 </div>
             </header>

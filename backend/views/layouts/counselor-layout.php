@@ -17,6 +17,7 @@ $counselorSidebarItems = [
     ['label' => 'Counseling Sessions', 'icon' => 'sidebar-sessions.svg', 'route' => $basePath . '/counselor/sessions', 'id' => 'sessions'],
     ['label' => 'Student Documents', 'icon' => 'sidebar-documents.svg', 'route' => $basePath . '/counselor/documents', 'id' => 'documents'],
     ['label' => 'My Inquiries', 'icon' => 'sidebar-appointments.svg', 'route' => $basePath . '/counselor/inquiries', 'id' => 'inquiries'],
+    ['label' => 'College Catalog', 'icon' => 'sidebar-counselors.svg', 'route' => $basePath . '/counselor/catalog', 'id' => 'catalog'],
 ];
 
 $pageTitle = $pageTitle ?? 'Counselor Dashboard';
@@ -64,9 +65,17 @@ $user = getUser();
         <div class="dashboard-main">
             <header class="topbar">
                 <div class="topbar__actions" style="margin-left:auto;">
+                    <?php include VIEW_PATH . '/partials/notification-bell.php'; ?>
+
                     <a href="<?php echo url('/counselor/profile'); ?>" class="topbar__profile" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px;cursor:pointer;">
+                        <?php
+                        $counselorAvatar = $user['avatar'] ?? '';
+                        if (!empty($counselorAvatar)): ?>
+                            <img src="<?php echo e($counselorAvatar); ?>" alt="Counselor profile" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+                        <?php else: ?>
+                            <img src="<?php echo e($topbarImagePath . '/' . $topbarAvatarImage); ?>" alt="Counselor profile picture">
+                        <?php endif; ?>
                         <span><?php echo e($user['name'] ?? 'Counselor'); ?></span>
-                        <img src="<?php echo e($topbarImagePath . '/' . $topbarAvatarImage); ?>" alt="Counselor profile picture">
                     </a>
                 </div>
             </header>

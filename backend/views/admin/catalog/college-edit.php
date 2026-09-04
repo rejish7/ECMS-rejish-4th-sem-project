@@ -19,17 +19,20 @@
         <div class="form-row">
             <div class="form-group">
                 <label>College Name *</label>
-                <input type="text" name="name" value="<?php echo e($college['name']); ?>" required>
+                <input type="text" name="name" value="<?php echo e($college['name']); ?>">
+                <?php if (!empty($_SESSION['errors']['name'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['name']); ?></div><?php endif; ?>
             </div>
             <div class="form-group">
                 <label>Code *</label>
-                <input type="text" name="code" value="<?php echo e($college['code']); ?>" required maxlength="20">
+                <input type="text" name="code" value="<?php echo e($college['code']); ?>" maxlength="20">
+                <?php if (!empty($_SESSION['errors']['code'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['code']); ?></div><?php endif; ?>
             </div>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label>Country *</label>
-                <input type="text" name="country" value="<?php echo e($college['country']); ?>" required>
+                <input type="text" name="country" value="<?php echo e($college['country']); ?>">
+                <?php if (!empty($_SESSION['errors']['country'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['country']); ?></div><?php endif; ?>
             </div>
             <div class="form-group">
                 <label>City</label>
@@ -63,6 +66,7 @@
             <button type="submit" class="btn-primary">Update College</button>
             <a href="<?php echo url('/admin/catalog'); ?>" class="btn-secondary">Cancel</a>
         </div>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
     </form>
 </div>
 <?php $content = ob_get_clean(); include __DIR__ . '/../../layouts/admin-layout.php';

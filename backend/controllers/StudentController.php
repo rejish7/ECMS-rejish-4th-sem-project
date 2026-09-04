@@ -3,6 +3,8 @@ require_once MODEL_PATH . '/Student.php';
 require_once MODEL_PATH . '/Counselor.php';
 require_once MODEL_PATH . '/Inquiry.php';
 require_once MODEL_PATH . '/Document.php';
+require_once MODEL_PATH . '/College.php';
+require_once MODEL_PATH . '/Course.php';
 require_once MODEL_PATH . '/Session.php';
 
 class StudentController extends Controller {
@@ -62,6 +64,30 @@ class StudentController extends Controller {
         }
 
         $data = $this->sanitize($this->getInput());
+
+        $errors = [];
+        if (empty($data['student_id'])) {
+            $data['student_id'] = 'STU-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        }
+        if (empty($data['name'])) {
+            $errors['name'] = 'Full name is required.';
+        }
+        if (empty($data['email'])) {
+            $errors['email'] = 'Email address is required.';
+        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Please enter a valid email address.';
+        }
+        $allowedLevels = ['High School', 'Undergraduate', 'Postgraduate'];
+        if (empty($data['education_level']) || !in_array($data['education_level'], $allowedLevels, true)) {
+            $errors['education_level'] = 'Please select a valid education level.';
+        }
+
+        if ($errors) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
+            $_SESSION['old'] = $data;
+            $this->redirect(url('/admin/students/create'));
+        }
 
         try {
             $id = $this->studentModel->create($data);
@@ -132,6 +158,28 @@ class StudentController extends Controller {
         }
 
         $data = $this->sanitize($this->getInput());
+
+        $errors = [];
+        if (empty($data['name'])) {
+            $errors['name'] = 'Full name is required.';
+        }
+        if (empty($data['email'])) {
+            $errors['email'] = 'Email address is required.';
+        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Please enter a valid email address.';
+        }
+        $allowedLevels = ['High School', 'Undergraduate', 'Postgraduate'];
+        if (!empty($data['education_level']) && !in_array($data['education_level'], $allowedLevels, true)) {
+            $errors['education_level'] = 'Please select a valid education level.';
+        }
+
+        if ($errors) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
+            $_SESSION['old'] = $data;
+            $this->redirect(url('/admin/students/' . $id . '/edit'));
+        }
+
         $this->studentModel->update($id, $data);
 
         flash('success', 'Student updated successfully.');
@@ -312,12 +360,17 @@ class StudentController extends Controller {
         $allowedCountries = ['USA', 'UK', 'Canada', 'Australia', 'Germany', 'New Zealand', 'Other'];
         $allowedLevels = ['High School', 'Undergraduate', 'Postgraduate'];
 
+        $errors = [];
         if (empty($data['country_of_interest']) || !in_array($data['country_of_interest'], $allowedCountries, true)) {
-            flash('error', 'Please select a valid study destination.');
-            $this->redirect(url('/student/inquiries'));
+            $errors['country_of_interest'] = 'Please select a valid study destination.';
         }
         if (empty($data['level_of_study']) || !in_array($data['level_of_study'], $allowedLevels, true)) {
-            flash('error', 'Please select a valid study level.');
+            $errors['level_of_study'] = 'Please select a valid study level.';
+        }
+
+        if ($errors) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
             $this->redirect(url('/student/inquiries'));
         }
 
@@ -332,6 +385,9 @@ class StudentController extends Controller {
             'level_of_study' => $data['level_of_study'],
             'message' => $data['message'] ?? '',
         ]);
+
+        $adminEmail = 'admin@ecms.edu';
+        createNotificationByEmail($adminEmail, 'New Student Inquiry', $student['name'] . ' has submitted a new inquiry about ' . e($data['country_of_interest']) . '.', '/admin/inquiries');
 
         flash('success', 'Inquiry submitted successfully.');
         $this->redirect(url('/student/inquiries'));
@@ -360,14 +416,19 @@ class StudentController extends Controller {
 
         $data = $this->sanitize($this->getInput());
 
+        $errors = [];
         if (empty($data['name'])) {
-            flash('error', 'Name is required.');
-            $this->redirect(url('/student/profile'));
+            $errors['name'] = 'Name is required.';
         }
 
         $allowedLevels = ['High School', 'Undergraduate', 'Postgraduate'];
         if (empty($data['education_level']) || !in_array($data['education_level'], $allowedLevels, true)) {
-            flash('error', 'Please select a valid education level.');
+            $errors['education_level'] = 'Please select a valid education level.';
+        }
+
+        if ($errors) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
             $this->redirect(url('/student/profile'));
         }
 
@@ -400,5 +461,99 @@ class StudentController extends Controller {
             flash('error', $result['error']);
         }
         $this->redirect(url('/student/profile'));
+    }
+
+    public function uploadAvatar() {
+        if (!$this->isPost()) {
+            $this->redirect(url('/student/profile'));
+        }
+
+        $student = $this->currentStudent();
+        if (!$student) {
+            $this->redirect(url('/student/profile'));
+        }
+
+        if (!isset($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+            flash('error', 'Please choose an image to upload.');
+            $this->redirect(url('/student/profile'));
+        }
+
+        $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $ext = strtolower(pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowedTypes, true)) {
+            flash('error', 'Only JPG, PNG, GIF, and WebP images are allowed.');
+            $this->redirect(url('/student/profile'));
+        }
+
+        if ($_FILES['avatar']['size'] > 5 * 1024 * 1024) {
+            flash('error', 'Image is too large. Maximum size is 5 MB.');
+            $this->redirect(url('/student/profile'));
+        }
+
+        $uploadDir = BASE_PATH . '/uploads/profiles/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        if (!empty($student['avatar'])) {
+            $oldPath = BASE_PATH . $student['avatar'];
+            if (file_exists($oldPath)) {
+                unlink($oldPath);
+            }
+        }
+
+        $fileName = 'avatar_student_' . $student['id'] . '_' . time() . '.' . $ext;
+        $filePath = $uploadDir . $fileName;
+
+        if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $filePath)) {
+            flash('error', 'Failed to upload image. Please try again.');
+            $this->redirect(url('/student/profile'));
+        }
+
+        $avatarUrl = '/uploads/profiles/' . $fileName;
+        $this->studentModel->update($student['id'], ['avatar' => $avatarUrl]);
+
+        $db = getDB();
+        $stmt = $db->prepare("UPDATE users SET avatar = ? WHERE email = ?");
+        $stmt->execute([$avatarUrl, $student['email']]);
+        $_SESSION['user']['avatar'] = $avatarUrl;
+
+        flash('success', 'Profile picture updated successfully.');
+        $this->redirect(url('/student/profile'));
+    }
+
+    public function catalog() {
+        $collegeModel = new College();
+        $courseModel = new Course();
+
+        $collegeFilters = [
+            'search' => $_GET['search'] ?? '',
+            'country' => $_GET['country'] ?? '',
+            'status' => 'active',
+            'limit' => 20,
+            'offset' => 0,
+        ];
+        $colleges = $collegeModel->getAll($collegeFilters);
+        $countries = $collegeModel->getCountries();
+
+        $courseFilters = [
+            'search' => $_GET['search'] ?? '',
+            'level' => $_GET['level'] ?? '',
+            'country' => $_GET['country'] ?? '',
+            'status' => 'active',
+            'limit' => 20,
+            'offset' => 0,
+        ];
+        $courses = $courseModel->getAll($courseFilters);
+
+        $this->view('student/catalog', [
+            'pageTitle' => 'College & Course Catalog',
+            'pageDescription' => 'Browse partner colleges and available courses.',
+            'currentPage' => 'catalog',
+            'colleges' => $colleges,
+            'courses' => $courses,
+            'countries' => $countries,
+            'filters' => $_GET,
+        ]);
     }
 }

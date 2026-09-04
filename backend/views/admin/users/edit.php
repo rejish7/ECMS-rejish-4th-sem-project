@@ -13,12 +13,13 @@
     <h3>Edit User</h3>
     <form method="POST" action="<?php echo url('/admin/users/' . $user['id'] . '/update'); ?>">
         <?php echo csrf_field(); ?>
-        <div class="form-group"><label>Name</label><input type="text" name="name" value="<?php echo e($user['name']); ?>" required></div>
-        <div class="form-group"><label>Email</label><input type="email" name="email" value="<?php echo e($user['email']); ?>" required></div>
+        <div class="form-group"><label>Name</label><input type="text" name="name" value="<?php echo e($user['name']); ?>"><?php if (!empty($_SESSION['errors']['name'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['name']); ?></div><?php endif; ?></div>
+        <div class="form-group"><label>Email</label><input type="email" name="email" value="<?php echo e($user['email']); ?>"><?php if (!empty($_SESSION['errors']['email'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['email']); ?></div><?php endif; ?></div>
         <div class="form-group"><label>Password (leave blank to keep current)</label><input type="password" name="password"></div>
         <div class="form-group"><label>Role</label><select name="role"><option value="student" <?php echo ($user['role'] ?? '') === 'student' ? 'selected' : ''; ?>>Student</option><option value="counselor" <?php echo ($user['role'] ?? '') === 'counselor' ? 'selected' : ''; ?>>Counselor</option><option value="admin" <?php echo ($user['role'] ?? '') === 'admin' ? 'selected' : ''; ?>>Administrator</option></select></div>
         <div class="form-group"><label>Status</label><select name="status"><option value="active" <?php echo ($user['status'] ?? '') === 'active' ? 'selected' : ''; ?>>Active</option><option value="inactive" <?php echo ($user['status'] ?? '') === 'inactive' ? 'selected' : ''; ?>>Inactive</option></select></div>
         <div class="form-actions"><button type="submit" class="btn-primary">Update User</button><a href="<?php echo url('/admin/users'); ?>" class="btn-secondary">Cancel</a></div>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
     </form>
 </div>
 <?php $content = ob_get_clean(); include __DIR__ . '/../../layouts/admin-layout.php';

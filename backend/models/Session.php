@@ -126,14 +126,15 @@ class Session {
 
     public function create($data) {
         $stmt = $this->db->prepare(
-            "INSERT INTO {$this->table} (session_id, student_id, counselor_id, mode, datetime, status, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, NOW())"
+            "INSERT INTO {$this->table} (session_id, student_id, counselor_id, mode, subject, datetime, status, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, NOW())"
         );
         $stmt->execute([
             $data['session_id'],
             $data['student_id'],
             $data['counselor_id'],
             $data['mode'],
+            $data['subject'] ?? null,
             $data['datetime'],
             $data['status'] ?? 'scheduled'
         ]);
@@ -144,7 +145,7 @@ class Session {
         $fields = [];
         $params = [];
 
-        $allowed = ['student_id', 'counselor_id', 'mode', 'datetime', 'status'];
+        $allowed = ['student_id', 'counselor_id', 'mode', 'subject', 'datetime', 'status'];
         foreach ($data as $key => $value) {
             if (in_array($key, $allowed)) {
                 $fields[] = "{$key} = ?";

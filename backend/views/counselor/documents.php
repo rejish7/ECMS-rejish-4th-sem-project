@@ -90,22 +90,11 @@
                                 <td><span class="doc-badge doc-badge--<?php echo e($doc['status']); ?>"><?php echo e(ucfirst($doc['status'])); ?></span></td>
                                 <td><?php echo $doc['submitted_at'] ? e(date('M d, Y', strtotime($doc['submitted_at']))) : '<span style="color:#9ca3af;">Not yet</span>'; ?></td>
                                 <td>
-                                    <?php if (in_array($doc['status'] ?? '', ['pending', 'resubmit'], true)): ?>
-                                        <form class="doc-review" method="POST" action="<?php echo url('/counselor/documents/' . $doc['id'] . '/review'); ?>">
-                                            <?php echo csrf_field(); ?>
-                                            <div class="doc-review-top">
-                                                <select name="status" required>
-                                                    <option value="">Review&hellip;</option>
-                                                    <option value="approved">Approve</option>
-                                                    <option value="rejected">Reject</option>
-                                                    <option value="resubmit">Request Resubmit</option>
-                                                </select>
-                                                <button type="submit">Submit</button>
-                                            </div>
-                                            <div class="doc-review-remarks">
-                                                <input type="text" name="remarks" placeholder="Remarks (optional)">
-                                            </div>
-                                        </form>
+                                    <?php if (($doc['status'] ?? '') !== 'approved'): ?>
+                                        <a href="<?php echo url('/counselor/documents/review-queue?status=' . e($doc['status']) . '&doc_id=' . $doc['id']); ?>" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:6px;border:1px solid #d0d5dd;background:#fff;font-size:12px;font-weight:500;color:#344054;text-decoration:none;white-space:nowrap;">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0Z"/></svg>
+                                            Review
+                                        </a>
                                     <?php else: ?>
                                         <div style="font-size:12px;color:#9ca3af;max-width:200px;"><?php echo e($doc['remarks'] ?? '-'); ?></div>
                                     <?php endif; ?>

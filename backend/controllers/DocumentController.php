@@ -74,12 +74,22 @@ class DocumentController extends Controller {
             $this->redirect(url('/admin/documents/review-queue'));
         }
 
-        $status = $_POST['status'] ?? '';
-        $remarks = $_POST['remarks'] ?? '';
-        $validStatuses = ['approved', 'rejected', 'resubmit'];
+        $input = $_POST;
+        $status = $input['status'] ?? '';
+        $remarks = trim($input['remarks'] ?? '');
 
-        if (!in_array($status, $validStatuses)) {
-            flash('error', 'Invalid review status.');
+        $errors = [];
+        if (!in_array($status, ['approved', 'rejected', 'resubmit'], true)) {
+            $errors['status'] = 'Invalid review status. Please select approved, rejected, or resubmit.';
+        }
+        if ($status === 'resubmit' && empty($remarks)) {
+            $errors['remarks'] = 'Please provide remarks when requesting resubmission.';
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['old'] = $input;
+            flash('error', 'Please fix the errors below.');
             $this->redirect(url('/admin/documents/review-queue'));
         }
 
@@ -88,6 +98,12 @@ class DocumentController extends Controller {
             $this->redirect(url('/login'));
         }
         $this->documentModel->review($id, $status, $remarks, $userId);
+
+        $document = $this->documentModel->getById($id);
+        if ($document) {
+            $statusMsg = $status === 'approved' ? 'approved' : ($status === 'rejected' ? 'rejected' : 'marked for resubmission');
+            createNotificationByEmail($document['student_email'] ?? '', 'Document ' . ucfirst($status), 'Your document "' . e($document['name']) . '" has been ' . $statusMsg . '.', '/student/documents');
+        }
 
         flash('success', 'Document review submitted successfully.');
         $this->redirect(url('/admin/documents/review-queue'));
@@ -112,8 +128,21 @@ class DocumentController extends Controller {
 
         $data = $this->sanitize($this->getInput());
 
-        if (empty($data['student_id']) || empty($data['name']) || !in_array($data['category'], ['education', 'visa'], true)) {
-            flash('error', 'Please select a student, a document name, and a category.');
+        $errors = [];
+        if (empty($data['student_id'])) {
+            $errors['student_id'] = 'Please select a student.';
+        }
+        if (empty($data['name'])) {
+            $errors['name'] = 'Document name is required.';
+        }
+        $allowedCategories = ['education', 'visa'];
+        if (empty($data['category']) || !in_array($data['category'], $allowedCategories, true)) {
+            $errors['category'] = 'Please select a valid category.';
+        }
+
+        if ($errors) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
             $this->redirect(url('/admin/documents/assign'));
         }
 
@@ -123,6 +152,11 @@ class DocumentController extends Controller {
             'category' => $data['category'],
             'assigned_by' => $_SESSION['user_id'] ?? null,
         ]);
+
+        $student = $this->studentModel->getById($data['student_id']);
+        if ($student) {
+            createNotificationByEmail($student['email'], 'Document Required', 'You have been required to submit: ' . e($data['name']) . '.', '/student/documents');
+        }
 
         flash('success', 'Required document assigned to the student.');
         $this->redirect(url('/admin/documents/student/' . $data['student_id']));
@@ -146,8 +180,22 @@ class DocumentController extends Controller {
 
         $data = $this->sanitize($this->getInput());
 
+        $errors = [];
         if (empty($data['student_id'])) {
-            flash('error', 'Please select a student.');
+            $errors['student_id'] = 'Please select a student.';
+        }
+        if (empty($data['name'])) {
+            $errors['name'] = 'Document name is required.';
+        }
+        $allowedCategories = ['education', 'visa'];
+        if (!empty($data['category']) && !in_array($data['category'], $allowedCategories, true)) {
+            $errors['category'] = 'Please select a valid category.';
+        }
+
+        if ($errors) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
+            $_SESSION['old'] = $data;
             $this->redirect(url('/admin/documents/create'));
         }
 
@@ -244,6 +292,22 @@ class DocumentController extends Controller {
         }
 
         $data = $this->sanitize($this->getInput());
+
+        $errors = [];
+        if (empty($data['name'])) {
+            $errors['name'] = 'Document name is required.';
+        }
+        $allowedCategories = ['education', 'visa'];
+        if (!empty($data['category']) && !in_array($data['category'], $allowedCategories, true)) {
+            $errors['category'] = 'Please select a valid category.';
+        }
+
+        if ($errors) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
+            $this->redirect(url('/admin/documents/' . $id . '/edit'));
+        }
+
         $this->documentModel->update($id, $data);
 
         flash('success', 'Document updated successfully.');
@@ -253,6 +317,14 @@ class DocumentController extends Controller {
     public function destroy($id) {
         if (!$this->isPost()) {
             $this->redirect(url('/admin/documents'));
+        }
+
+        $doc = $this->documentModel->getById($id);
+        if ($doc && !empty($doc['file_path'])) {
+            $filePath = BASE_PATH . $doc['file_path'];
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
         }
 
         $this->documentModel->delete($id);

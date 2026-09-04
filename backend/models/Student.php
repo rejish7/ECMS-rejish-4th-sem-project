@@ -101,7 +101,7 @@ class Student {
         $fields = [];
         $params = [];
 
-        $allowed = ['student_id', 'name', 'email', 'education_level', 'counselor_id', 'status'];
+        $allowed = ['student_id', 'name', 'email', 'education_level', 'counselor_id', 'status', 'avatar'];
         foreach ($data as $key => $value) {
             if (in_array($key, $allowed)) {
                 if ($key === 'counselor_id') {

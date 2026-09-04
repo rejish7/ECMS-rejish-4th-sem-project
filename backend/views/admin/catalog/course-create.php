@@ -19,7 +19,7 @@
         <?php echo csrf_field(); ?>
         <div class="form-group">
             <label>College *</label>
-            <select name="college_id" required>
+            <select name="college_id">
                 <option value="">Select College</option>
                 <?php if (!empty($colleges)): ?>
                     <?php foreach ($colleges as $college): ?>
@@ -27,31 +27,36 @@
                     <?php endforeach; ?>
                 <?php endif; ?>
             </select>
+            <?php if (!empty($_SESSION['errors']['college_id'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['college_id']); ?></div><?php endif; ?>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label>Course Name *</label>
-                <input type="text" name="name" required placeholder="e.g., BSc Computer Science">
+                <input type="text" name="name" placeholder="e.g., BSc Computer Science">
+                <?php if (!empty($_SESSION['errors']['name'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['name']); ?></div><?php endif; ?>
             </div>
             <div class="form-group">
                 <label>Course Code *</label>
-                <input type="text" name="code" required placeholder="e.g., CS-101" maxlength="20">
+                <input type="text" name="code" placeholder="e.g., CS-101" maxlength="20">
+                <?php if (!empty($_SESSION['errors']['code'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['code']); ?></div><?php endif; ?>
             </div>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label>Level *</label>
-                <select name="level" required>
+                <select name="level">
                     <option value="">Select Level</option>
                     <option value="bachelor">Bachelor</option>
                     <option value="master">Master</option>
                     <option value="diploma">Diploma</option>
                     <option value="phd">PhD</option>
                 </select>
+                <?php if (!empty($_SESSION['errors']['level'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['level']); ?></div><?php endif; ?>
             </div>
             <div class="form-group">
                 <label>Duration *</label>
-                <input type="text" name="duration" required placeholder="e.g., 3 Years">
+                <input type="text" name="duration" placeholder="e.g., 3 Years">
+                <?php if (!empty($_SESSION['errors']['duration'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['duration']); ?></div><?php endif; ?>
             </div>
         </div>
         <div class="form-row">
@@ -90,6 +95,7 @@
             <button type="submit" class="btn-primary">Add Course</button>
             <a href="<?php echo url('/admin/catalog'); ?>" class="btn-secondary">Cancel</a>
         </div>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
     </form>
 </div>
 <?php $content = ob_get_clean(); include __DIR__ . '/../../layouts/admin-layout.php';

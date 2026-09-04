@@ -27,24 +27,35 @@ ob_start();
         <?php echo csrf_field(); ?>
         <div class="form-group">
             <label for="student_id">Student ID</label>
-            <input type="text" id="student_id" name="student_id" required>
+            <div class="pw-field">
+                <input type="text" id="student_id" name="student_id" readonly>
+                <button type="button" class="pw-btn" id="generateIdBtn" title="Generate a new Student ID">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 10V4h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 10"/></svg>
+                    Generate
+                </button>
+            </div>
+            <div class="hint">Auto-generated unique student identifier.</div>
+            <?php if (!empty($_SESSION['errors']['student_id'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['student_id']); ?></div><?php endif; ?>
         </div>
         <div class="form-group">
             <label for="name">Full Name</label>
-            <input type="text" id="name" name="name" required>
+            <input type="text" id="name" name="name">
+            <?php if (!empty($_SESSION['errors']['name'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['name']); ?></div><?php endif; ?>
         </div>
         <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" id="email" name="email" required>
+            <input type="email" id="email" name="email">
+            <?php if (!empty($_SESSION['errors']['email'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['email']); ?></div><?php endif; ?>
         </div>
         <div class="form-group">
             <label for="education_level">Education Level</label>
-            <select id="education_level" name="education_level" required>
+            <select id="education_level" name="education_level">
                 <option value="">Select level</option>
                 <option value="High School">High School</option>
                 <option value="Undergraduate">Undergraduate</option>
                 <option value="Postgraduate">Postgraduate</option>
             </select>
+            <?php if (!empty($_SESSION['errors']['education_level'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['education_level']); ?></div><?php endif; ?>
         </div>
         <div class="form-group">
             <label for="counselor_id">Assigned Counselor</label>
@@ -59,26 +70,41 @@ ob_start();
             <label for="password">Login Password</label>
             <div class="pw-field">
                 <input type="text" id="password" name="password" readonly autocomplete="off">
-                <button type="button" class="pw-btn" id="regenerateBtn" title="Generate a new password">
+                <button type="button" class="pw-btn" id="generatePwBtn" title="Generate a new password">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 10V4h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 10"/></svg>
-                    Regenerate
+                    Generate
                 </button>
                 <button type="button" class="pw-btn" id="copyBtn" title="Copy password">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                     Copy
                 </button>
             </div>
-            <div class="hint">A secure password is generated automatically. You can regenerate it, but it cannot be edited. It will also be emailed to the student, and the student can change it themselves from their dashboard.</div>
+            <div class="hint">Click "Generate" to create a secure password. It will be emailed to the student, and they can change it from their dashboard.</div>
         </div>
         <div class="form-actions">
             <button type="submit" class="btn-primary">Register Student</button>
             <a href="<?php echo url('/admin/students'); ?>" class="btn-secondary">Cancel</a>
         </div>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
     </form>
 </div>
 
 <script>
 (function () {
+    // Student ID generator
+    function genStudentId() {
+        var d = new Date();
+        var datePart = d.getFullYear().toString() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+        var num = Math.floor(Math.random() * 9999) + 1;
+        return 'STU-' + datePart + '-' + String(num).padStart(4, '0');
+    }
+    var idInput = document.getElementById('student_id');
+    var genIdBtn = document.getElementById('generateIdBtn');
+    function setId() { idInput.value = genStudentId(); }
+    setId();
+    genIdBtn.addEventListener('click', setId);
+
+    // Password generator
     var charset = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
     function genPassword(len) {
         len = len || 14;
@@ -90,18 +116,17 @@ ob_start();
         }
         return out;
     }
-    var input = document.getElementById('password');
-    var regen = document.getElementById('regenerateBtn');
+    var pwInput = document.getElementById('password');
+    var genPwBtn = document.getElementById('generatePwBtn');
     var copy = document.getElementById('copyBtn');
-    function setPassword() {
-        input.value = genPassword();
-    }
-    setPassword();
-    regen.addEventListener('click', setPassword);
+    genPwBtn.addEventListener('click', function () {
+        pwInput.value = genPassword();
+    });
     copy.addEventListener('click', function () {
-        input.select();
-        input.setSelectionRange(0, 99999);
-        try { navigator.clipboard.writeText(input.value); } catch (e) {}
+        if (!pwInput.value) { alert('Generate a password first.'); return; }
+        pwInput.select();
+        pwInput.setSelectionRange(0, 99999);
+        try { navigator.clipboard.writeText(pwInput.value); } catch (e) {}
         var old = copy.textContent;
         copy.textContent = 'Copied!';
         setTimeout(function () { copy.textContent = old; }, 1200);

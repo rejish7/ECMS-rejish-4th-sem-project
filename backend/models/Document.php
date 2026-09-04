@@ -111,6 +111,11 @@ class Document {
                 WHERE 1=1";
         $params = [];
 
+        if (!empty($filters['counselor_id'])) {
+            $sql .= " AND s.counselor_id = ?";
+            $params[] = $filters['counselor_id'];
+        }
+
         if (!empty($filters['status'])) {
             $sql .= " AND d.status = ?";
             $params[] = $filters['status'];
@@ -148,6 +153,11 @@ class Document {
         $sql = "SELECT COUNT(*) FROM {$this->table} d LEFT JOIN students s ON d.student_id = s.id WHERE 1=1";
         $params = [];
 
+        if (!empty($filters['counselor_id'])) {
+            $sql .= " AND s.counselor_id = ?";
+            $params[] = $filters['counselor_id'];
+        }
+
         if (!empty($filters['category'])) {
             $sql .= " AND d.category = ?";
             $params[] = $filters['category'];
@@ -176,20 +186,27 @@ class Document {
         return $stmt->fetchColumn();
     }
 
-    public function getStats() {
-        $stmt = $this->db->prepare(
-            "SELECT
+    public function getStats($counselorId = null) {
+        $sql = "SELECT
                 COUNT(*) AS total,
-                SUM(CASE WHEN status = 'assigned' THEN 1 ELSE 0 END) AS assigned,
-                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,
-                SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved,
-                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) AS rejected,
-                SUM(CASE WHEN status = 'resubmit' THEN 1 ELSE 0 END) AS resubmit,
-                SUM(CASE WHEN category = 'education' THEN 1 ELSE 0 END) AS education,
-                SUM(CASE WHEN category = 'visa' THEN 1 ELSE 0 END) AS visa
-             FROM {$this->table}"
-        );
-        $stmt->execute();
+                SUM(CASE WHEN d.status = 'assigned' THEN 1 ELSE 0 END) AS assigned,
+                SUM(CASE WHEN d.status = 'pending' THEN 1 ELSE 0 END) AS pending,
+                SUM(CASE WHEN d.status = 'approved' THEN 1 ELSE 0 END) AS approved,
+                SUM(CASE WHEN d.status = 'rejected' THEN 1 ELSE 0 END) AS rejected,
+                SUM(CASE WHEN d.status = 'resubmit' THEN 1 ELSE 0 END) AS resubmit,
+                SUM(CASE WHEN d.category = 'education' THEN 1 ELSE 0 END) AS education,
+                SUM(CASE WHEN d.category = 'visa' THEN 1 ELSE 0 END) AS visa
+             FROM {$this->table} d
+             LEFT JOIN students s ON d.student_id = s.id";
+        $params = [];
+
+        if ($counselorId) {
+            $sql .= " WHERE s.counselor_id = ?";
+            $params[] = $counselorId;
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
         return $stmt->fetch();
     }
 

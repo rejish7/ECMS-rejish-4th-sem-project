@@ -63,9 +63,23 @@ class InquiryController extends Controller {
             $this->redirect(url('/admin/inquiries'));
         }
 
-        $counselor_id = $_POST['counselor_id'] ?? null;
+        $input = $_POST;
+        $counselor_id = $input['counselor_id'] ?? null;
+
+        $errors = [];
         if (empty($counselor_id)) {
-            flash('error', 'Please select a counselor.');
+            $errors['counselor_id'] = 'Please select a counselor.';
+        } else {
+            $counselor = $this->counselorModel->getById($counselor_id);
+            if (!$counselor) {
+                $errors['counselor_id'] = 'Selected counselor not found.';
+            }
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['old'] = $input;
+            flash('error', 'Please fix the errors below.');
             $this->redirect(url('/admin/inquiries/' . $id));
         }
 
@@ -73,6 +87,13 @@ class InquiryController extends Controller {
             'counselor_id' => $counselor_id,
             'status' => 'assigned',
         ]);
+
+        $inquiry = $this->inquiryModel->getById($id);
+        if ($inquiry) {
+            $counselor = $this->counselorModel->getById($counselor_id);
+            createNotificationByEmail($inquiry['student_email'], 'Inquiry Assigned', 'Your inquiry about ' . e($inquiry['country_of_interest']) . ' has been assigned to counselor ' . e($counselor['name'] ?? 'N/A') . '.', '/student/inquiries');
+            createNotificationByEmail($counselor['email'] ?? '', 'New Inquiry Assigned', 'An inquiry about ' . e($inquiry['country_of_interest']) . ' from ' . e($inquiry['student_name'] ?? 'a student') . ' has been assigned to you.', '/counselor/inquiries');
+        }
 
         flash('success', 'Counselor assigned successfully.');
         $this->redirect(url('/admin/inquiries/' . $id));
@@ -105,6 +126,12 @@ class InquiryController extends Controller {
             'status' => 'assigned',
         ]);
 
+        $inquiry = $this->inquiryModel->getById($id);
+        if ($inquiry) {
+            createNotificationByEmail($inquiry['student_email'], 'Inquiry Assigned', 'Your inquiry about ' . e($inquiry['country_of_interest']) . ' has been auto-assigned to counselor ' . e($counselor['name']) . '.', '/student/inquiries');
+            createNotificationByEmail($counselor['email'], 'New Inquiry Assigned', 'An inquiry about ' . e($inquiry['country_of_interest']) . ' from ' . e($inquiry['student_name'] ?? 'a student') . ' has been auto-assigned to you.', '/counselor/inquiries');
+        }
+
         flash('success', 'Inquiry auto-assigned to ' . e($counselor['name']) . '.');
         $this->redirect(url('/admin/inquiries/' . $id));
     }
@@ -121,6 +148,11 @@ class InquiryController extends Controller {
         }
 
         $this->inquiryModel->update($id, ['status' => 'closed']);
+
+        $inquiry = $this->inquiryModel->getById($id);
+        if ($inquiry) {
+            createNotificationByEmail($inquiry['student_email'], 'Inquiry Closed', 'Your inquiry about ' . e($inquiry['country_of_interest']) . ' has been closed. You can now submit a new inquiry for this country.', '/student/inquiries');
+        }
 
         flash('success', 'Inquiry marked as closed. The student can now submit a new inquiry for this country.');
         $this->redirect(url('/admin/inquiries/' . $id));

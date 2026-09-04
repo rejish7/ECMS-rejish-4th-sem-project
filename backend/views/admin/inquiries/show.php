@@ -55,12 +55,12 @@
                 <?php echo csrf_field(); ?>
                 <button type="submit" class="btn-close">Mark as Closed</button>
             </form>
+            <button type="button" class="btn-primary" onclick="document.getElementById('assignModal').classList.add('active')">Assign Counselor</button>
+            <form method="POST" action="<?php echo url('/admin/inquiries/' . $inquiry['id'] . '/auto-assign'); ?>" style="display:inline;" onsubmit="return confirm('Auto-assign to least busy counselor?')">
+                <?php echo csrf_field(); ?>
+                <button type="submit" class="btn-auto">Auto-Assign</button>
+            </form>
         <?php endif; ?>
-        <button type="button" class="btn-primary" onclick="document.getElementById('assignModal').classList.add('active')">Assign Counselor</button>
-        <form method="POST" action="<?php echo url('/admin/inquiries/' . $inquiry['id'] . '/auto-assign'); ?>" style="display:inline;" onsubmit="return confirm('Auto-assign to least busy counselor?')">
-            <?php echo csrf_field(); ?>
-            <button type="submit" class="btn-auto">Auto-Assign</button>
-        </form>
         <form method="POST" action="<?php echo url('/admin/inquiries/' . $inquiry['id'] . '/delete'); ?>" onsubmit="return confirm('Are you sure you want to delete this inquiry?')">
             <?php echo csrf_field(); ?>
             <button type="submit" class="btn-danger">Delete</button>
@@ -83,17 +83,19 @@
             <div class="modal-body">
                 <p style="margin:0 0 16px;font-size:13px;color:#73777f;">Assign a counselor to this inquiry</p>
                 <label for="counselor_id">Select Counselor</label>
-                <select name="counselor_id" id="counselor_id" required>
+                <select name="counselor_id" id="counselor_id">
                     <option value="">-- Choose a counselor --</option>
                     <?php foreach ($counselors as $counselor): ?>
                         <option value="<?php echo e($counselor['id']); ?>" <?php echo ($inquiry['counselor_id'] ?? '') == $counselor['id'] ? 'selected' : ''; ?>><?php echo e($counselor['name']); ?> (<?php echo e($counselor['specialization']); ?>)</option>
                     <?php endforeach; ?>
                 </select>
+                <?php if (!empty($_SESSION['errors']['counselor_id'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['counselor_id']); ?></div><?php endif; ?>
             </div>
             <div class="modal-footer">
                 <button type="button" class="modal-btn modal-btn--cancel" onclick="document.getElementById('assignModal').classList.remove('active')">Cancel</button>
                 <button type="submit" class="modal-btn modal-btn--primary">Assign Counselor</button>
             </div>
+            <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
         </form>
     </div>
 </div>

@@ -43,7 +43,7 @@ ob_start();
         <div class="form-row">
             <div class="form-group">
                 <label>Preferred Study Destination</label>
-                <select name="country_of_interest" required>
+                <select name="country_of_interest">
                     <option value="" disabled selected></option>
                     <?php
                     $countryOptions = [
@@ -63,6 +63,7 @@ ob_start();
                         <option value="<?php echo e($value); ?>"><?php echo e($label); ?></option>
                     <?php endforeach; ?>
                 </select>
+                <?php if (!empty($_SESSION['errors']['country_of_interest'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['country_of_interest']); ?></div><?php endif; ?>
                 <?php if (!empty($inquiredCountries)): ?>
                     <div class="hint inquired">
                         You have already inquired for these countries: <?php echo e(implode(', ', array_map(function ($c) use ($countryOptions) { return $countryOptions[$c] ?? $c; }, array_unique($inquiredCountries)))); ?>.
@@ -72,22 +73,25 @@ ob_start();
             </div>
             <div class="form-group">
                 <label>Study Level</label>
-                <select name="level_of_study" required>
+                <select name="level_of_study">
                     <option value="" disabled selected></option>
                     <option value="High School">High School</option>
                     <option value="Undergraduate">Undergraduate</option>
                     <option value="Postgraduate">Postgraduate</option>
                 </select>
+                <?php if (!empty($_SESSION['errors']['level_of_study'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['level_of_study']); ?></div><?php endif; ?>
             </div>
         </div>
         <div class="form-group">
             <label>Message</label>
-            <textarea name="message" rows="3" placeholder="Tell us what you would like to know about your study destination..." required></textarea>
+            <textarea name="message" rows="3" placeholder="Tell us what you would like to know about your study destination..."></textarea>
+            <?php if (!empty($_SESSION['errors']['message'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['message']); ?></div><?php endif; ?>
         </div>
         <div class="form-actions">
-            <span class="hint">Fields marked required must be filled in.</span>
+            <span class="hint">All fields are validated server-side.</span>
             <button type="submit" class="btn">Submit Inquiry</button>
         </div>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
     </form>
 </div>
 <?php

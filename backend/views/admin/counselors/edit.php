@@ -14,11 +14,11 @@
     <h3>Edit Counselor</h3>
     <form method="POST" action="<?php echo url('/admin/counselors/' . $counselor['id'] . '/update'); ?>">
         <?php echo csrf_field(); ?>
-        <div class="form-group"><label>Name</label><input type="text" name="name" value="<?php echo e($counselor['name']); ?>" required></div>
-        <div class="form-group"><label>Email</label><input type="email" name="email" value="<?php echo e($counselor['email']); ?>" required></div>
+        <div class="form-group"><label>Name</label><input type="text" name="name" value="<?php echo e($counselor['name']); ?>"><?php if (!empty($_SESSION['errors']['name'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['name']); ?></div><?php endif; ?></div>
+        <div class="form-group"><label>Email</label><input type="email" name="email" value="<?php echo e($counselor['email']); ?>"><?php if (!empty($_SESSION['errors']['email'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['email']); ?></div><?php endif; ?></div>
         <div class="form-group">
             <label>Specialization</label>
-            <select name="specialization" required>
+            <select name="specialization">
                 <option value="">Select specialization</option>
                 <option value="Undergraduate" <?php echo ($counselor['specialization'] ?? '') === 'Undergraduate' ? 'selected' : ''; ?>>Undergraduate</option>
                 <option value="Postgraduate" <?php echo ($counselor['specialization'] ?? '') === 'Postgraduate' ? 'selected' : ''; ?>>Postgraduate</option>
@@ -28,6 +28,7 @@
                     <option value="<?php echo e($counselorSpec); ?>" selected><?php echo e($counselorSpec); ?></option>
                 <?php endif; ?>
             </select>
+            <?php if (!empty($_SESSION['errors']['specialization'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['specialization']); ?></div><?php endif; ?>
         </div>
         <div class="form-group"><label>Max Students</label><input type="number" name="max_students" value="<?php echo e($counselor['max_students'] ?? 50); ?>"></div>
         <div class="form-group">
@@ -41,6 +42,7 @@
             <button type="submit" class="btn-primary">Update Counselor</button>
             <a href="<?php echo url('/admin/counselors'); ?>" class="btn-secondary">Cancel</a>
         </div>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
     </form>
 </div>
 <?php $content = ob_get_clean(); include __DIR__ . '/../../layouts/admin-layout.php';

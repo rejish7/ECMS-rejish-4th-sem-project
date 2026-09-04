@@ -8,7 +8,7 @@
     .rq-header h2 { margin: 0; color: #0b1c30; font-size: 24px; font-weight: 700; }
 
     .rq-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
-    .rq-stat { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; text-align: center; cursor: pointer; transition: all 0.15s; }
+    .rq-stat { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; text-align: center; cursor: pointer; transition: all 0.15s; text-decoration: none; color: inherit; }
     .rq-stat:hover { border-color: #0054cb; }
     .rq-stat.active { border-color: #0054cb; background: #f0f7ff; }
     .rq-stat__value { font-size: 22px; font-weight: 700; color: #0b1c30; }
@@ -22,7 +22,7 @@
     .rq-list { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; flex: 1; }
     .rq-list-header { display: grid; grid-template-columns: 1fr 140px 100px 90px 80px; padding: 10px 16px; background: #fafbfc; border-bottom: 1px solid #e5e7eb; font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .rq-item { display: grid; grid-template-columns: 1fr 140px 100px 90px 80px; padding: 14px 16px; border-bottom: 1px solid #f3f4f6; align-items: center; cursor: pointer; transition: background 0.1s; }
+    .rq-item { display: grid; grid-template-columns: 1fr 140px 100px 90px 80px; padding: 14px 16px; border-bottom: 1px solid #f3f4f6; align-items: center; cursor: pointer; transition: background 0.1s; text-decoration: none; color: inherit; }
     .rq-item:last-child { border-bottom: none; }
     .rq-item:hover { background: #f9fafb; }
     .rq-item.active { background: #f0f7ff; border-left: 3px solid #0054cb; }
@@ -100,25 +100,25 @@
         </div>
 
         <div class="rq-stats">
-            <a href="<?php echo url('/admin/documents/review-queue'); ?>" class="rq-stat <?php echo ($filters['status'] ?? 'pending') === 'pending' ? 'active' : ''; ?>" style="text-decoration:none;">
+            <a href="<?php echo url('/counselor/documents/review-queue'); ?>" class="rq-stat <?php echo ($filters['status'] ?? 'pending') === 'pending' ? 'active' : ''; ?>">
                 <div class="rq-stat__value"><?php echo e($stats['pending'] ?? 0); ?></div>
                 <div class="rq-stat__label">Pending</div>
             </a>
-            <a href="<?php echo url('/admin/documents/review-queue?status=approved'); ?>" class="rq-stat <?php echo ($filters['status'] ?? '') === 'approved' ? 'active' : ''; ?>" style="text-decoration:none;">
+            <a href="<?php echo url('/counselor/documents/review-queue?status=approved'); ?>" class="rq-stat <?php echo ($filters['status'] ?? '') === 'approved' ? 'active' : ''; ?>">
                 <div class="rq-stat__value" style="color:#059669;"><?php echo e($stats['approved'] ?? 0); ?></div>
                 <div class="rq-stat__label">Approved</div>
             </a>
-            <a href="<?php echo url('/admin/documents/review-queue?status=resubmit'); ?>" class="rq-stat <?php echo ($filters['status'] ?? '') === 'resubmit' ? 'active' : ''; ?>" style="text-decoration:none;">
+            <a href="<?php echo url('/counselor/documents/review-queue?status=resubmit'); ?>" class="rq-stat <?php echo ($filters['status'] ?? '') === 'resubmit' ? 'active' : ''; ?>">
                 <div class="rq-stat__value" style="color:#2563eb;"><?php echo e($stats['resubmit'] ?? 0); ?></div>
                 <div class="rq-stat__label">Resubmit</div>
             </a>
-            <a href="<?php echo url('/admin/documents/review-queue?status=rejected'); ?>" class="rq-stat <?php echo ($filters['status'] ?? '') === 'rejected' ? 'active' : ''; ?>" style="text-decoration:none;">
+            <a href="<?php echo url('/counselor/documents/review-queue?status=rejected'); ?>" class="rq-stat <?php echo ($filters['status'] ?? '') === 'rejected' ? 'active' : ''; ?>">
                 <div class="rq-stat__value" style="color:#dc2626;"><?php echo e($stats['rejected'] ?? 0); ?></div>
                 <div class="rq-stat__label">Rejected</div>
             </a>
         </div>
 
-        <form class="rq-filters" method="GET" action="<?php echo url('/admin/documents/review-queue'); ?>">
+        <form class="rq-filters" method="GET" action="<?php echo url('/counselor/documents/review-queue'); ?>">
             <input type="hidden" name="status" value="<?php echo e($filters['status'] ?? 'pending'); ?>">
             <input type="text" name="search" placeholder="Search students..." value="<?php echo e($filters['search'] ?? ''); ?>">
             <select name="category">
@@ -138,7 +138,7 @@
             </div>
             <?php if (!empty($documents)): ?>
                 <?php foreach ($documents as $doc): ?>
-                    <a href="<?php echo url('/admin/documents/review-queue?status=' . ($filters['status'] ?? 'pending') . '&doc_id=' . $doc['id']); ?>" class="rq-item <?php echo ($selectedDoc['id'] ?? null) == $doc['id'] ? 'active' : ''; ?>" style="text-decoration:none;color:inherit;">
+                    <a href="<?php echo url('/counselor/documents/review-queue?status=' . ($filters['status'] ?? 'pending') . '&doc_id=' . $doc['id']); ?>" class="rq-item <?php echo ($selectedDoc['id'] ?? null) == $doc['id'] ? 'active' : ''; ?>">
                         <div class="rq-student">
                             <div class="rq-avatar"><?php echo e(substr($doc['student_name'] ?? 'NA', 0, 2)); ?></div>
                             <div class="rq-student-info">
@@ -200,8 +200,8 @@
                         <div class="rq-doc-row"><span class="rq-doc-label">Status</span><span class="rq-doc-value"><span class="rq-badge rq-badge--<?php echo e($selectedDoc['status']); ?>"><?php echo e(ucfirst($selectedDoc['status'])); ?></span></span></div>
                     </div>
 
-                    <?php if ($selectedDoc['status'] === 'pending'): ?>
-                        <form class="rq-review-form" method="POST" action="<?php echo url('/admin/documents/' . $selectedDoc['id'] . '/review'); ?>">
+                    <?php if (in_array($selectedDoc['status'] ?? '', ['pending', 'resubmit'], true)): ?>
+                        <form class="rq-review-form" method="POST" action="<?php echo url('/counselor/documents/' . $selectedDoc['id'] . '/review'); ?>">
                             <?php echo csrf_field(); ?>
                             <h4>Review Decision</h4>
                             <div class="rq-radio-group">
@@ -275,4 +275,4 @@
 </div>
 <?php
 $content = ob_get_clean();
-include __DIR__ . '/../../layouts/admin-layout.php';
+include __DIR__ . '/../layouts/counselor-layout.php';

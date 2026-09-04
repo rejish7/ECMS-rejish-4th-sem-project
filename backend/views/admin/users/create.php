@@ -13,12 +13,13 @@
     <h3>Add New User</h3>
     <form method="POST" action="<?php echo url('/admin/users/store'); ?>">
         <?php echo csrf_field(); ?>
-        <div class="form-group"><label>User ID</label><input type="text" name="user_id" required></div>
-        <div class="form-group"><label>Name</label><input type="text" name="name" required></div>
-        <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
-        <div class="form-group"><label>Password</label><input type="password" name="password" required></div>
+        <div class="form-group"><label>User ID</label><input type="text" name="user_id"><?php if (!empty($_SESSION['errors']['user_id'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['user_id']); ?></div><?php endif; ?></div>
+        <div class="form-group"><label>Name</label><input type="text" name="name"><?php if (!empty($_SESSION['errors']['name'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['name']); ?></div><?php endif; ?></div>
+        <div class="form-group"><label>Email</label><input type="email" name="email"><?php if (!empty($_SESSION['errors']['email'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['email']); ?></div><?php endif; ?></div>
+        <div class="form-group"><label>Password</label><input type="password" name="password"><?php if (!empty($_SESSION['errors']['password'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['password']); ?></div><?php endif; ?></div>
         <div class="form-group"><label>Role</label><select name="role"><option value="student">Student</option><option value="counselor">Counselor</option><option value="admin">Administrator</option></select></div>
         <div class="form-actions"><button type="submit" class="btn-primary">Create User</button><a href="<?php echo url('/admin/users'); ?>" class="btn-secondary">Cancel</a></div>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
     </form>
 </div>
 <?php $content = ob_get_clean(); include __DIR__ . '/../../layouts/admin-layout.php';

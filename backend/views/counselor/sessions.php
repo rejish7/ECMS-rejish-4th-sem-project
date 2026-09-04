@@ -65,7 +65,7 @@ ob_start();
         <div class="ses-card-header"><h3>All Sessions</h3></div>
         <?php if (!empty($sessions)): ?>
             <table class="ses-table">
-                <thead><tr><th>Student</th><th>Session ID</th><th>Mode</th><th>Date &amp; Time</th><th>Status</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Student</th><th>Session ID</th><th>Mode</th><th>Subject</th><th>Date &amp; Time</th><th>Status</th><th>Actions</th></tr></thead>
                 <tbody>
                     <?php foreach ($sessions as $s): ?>
                         <tr>
@@ -80,6 +80,7 @@ ob_start();
                             </td>
                             <td><?php echo e($s['session_id'] ?? $s['id']); ?></td>
                             <td><span class="ses-chip ses-chip--<?php echo e(($s['mode'] ?? 'In-Person') === 'Video Call' ? 'video' : 'in-person'); ?>"><?php echo e($s['mode'] ?? '-'); ?></span></td>
+                            <td><?php echo e($s['subject'] ?? '-'); ?></td>
                             <td><?php echo e(date('M d, Y g:i A', strtotime($s['datetime']))); ?></td>
                             <td><span class="ses-status ses-status--<?php echo e($s['status']); ?>"><span class="ses-status__dot"></span><?php echo e(ucfirst($s['status'])); ?></span></td>
                             <td>

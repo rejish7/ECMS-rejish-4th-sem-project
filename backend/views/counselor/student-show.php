@@ -84,12 +84,13 @@ ob_start();
         <div class="spro-card-header"><h3>Sessions <span class="spro-count">(<?php echo count($sessions); ?>)</span></h3></div>
         <?php if (!empty($sessions)): ?>
             <table class="spro-table">
-                <thead><tr><th>Session ID</th><th>Mode</th><th>Date &amp; Time</th><th>Status</th></tr></thead>
+                <thead><tr><th>Session ID</th><th>Mode</th><th>Subject</th><th>Date &amp; Time</th><th>Status</th></tr></thead>
                 <tbody>
                     <?php foreach ($sessions as $s): ?>
                         <tr>
                             <td><?php echo e($s['session_id'] ?? $s['id']); ?></td>
                             <td><?php echo e($s['mode'] ?? '-'); ?></td>
+                            <td><?php echo e($s['subject'] ?? '-'); ?></td>
                             <td><?php echo e(date('M d, Y g:i A', strtotime($s['datetime']))); ?></td>
                             <td><span class="spro-badge spro-badge--<?php echo e($s['status']); ?>"><?php echo e(ucfirst($s['status'])); ?></span></td>
                         </tr>

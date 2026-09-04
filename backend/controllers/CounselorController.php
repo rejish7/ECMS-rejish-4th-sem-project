@@ -4,6 +4,8 @@ require_once MODEL_PATH . '/Student.php';
 require_once MODEL_PATH . '/Session.php';
 require_once MODEL_PATH . '/Inquiry.php';
 require_once MODEL_PATH . '/Document.php';
+require_once MODEL_PATH . '/College.php';
+require_once MODEL_PATH . '/Course.php';
 
 class CounselorController extends Controller {
     private $counselorModel;
@@ -57,6 +59,29 @@ class CounselorController extends Controller {
         }
 
         $data = $this->sanitize($this->getInput());
+
+        $errors = [];
+        if (empty($data['name'])) {
+            $errors['name'] = 'Full name is required.';
+        }
+        if (empty($data['email'])) {
+            $errors['email'] = 'Email address is required.';
+        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Please enter a valid email address.';
+        }
+        if (empty($data['specialization'])) {
+            $errors['specialization'] = 'Specialization is required.';
+        }
+        if (!empty($data['max_students']) && (!is_numeric($data['max_students']) || (int)$data['max_students'] < 1)) {
+            $errors['max_students'] = 'Max students must be a positive number.';
+        }
+
+        if ($errors) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
+            $_SESSION['old'] = $data;
+            $this->redirect(url('/admin/counselors/create'));
+        }
 
         try {
             $id = $this->counselorModel->create($data);
@@ -119,6 +144,27 @@ class CounselorController extends Controller {
         }
 
         $data = $this->sanitize($this->getInput());
+
+        $errors = [];
+        if (empty($data['name'])) {
+            $errors['name'] = 'Full name is required.';
+        }
+        if (empty($data['email'])) {
+            $errors['email'] = 'Email address is required.';
+        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Please enter a valid email address.';
+        }
+        if (!empty($data['max_students']) && (!is_numeric($data['max_students']) || (int)$data['max_students'] < 1)) {
+            $errors['max_students'] = 'Max students must be a positive number.';
+        }
+
+        if ($errors) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
+            $_SESSION['old'] = $data;
+            $this->redirect(url('/admin/counselors/' . $id . '/edit'));
+        }
+
         $this->counselorModel->update($id, $data);
 
         flash('success', 'Counselor updated successfully.');
@@ -154,6 +200,42 @@ class CounselorController extends Controller {
         ]);
     }
 
+    public function reviewQueue() {
+        $counselor = $this->currentCounselor();
+        if (!$counselor) {
+            $this->redirect(url('/login'));
+        }
+
+        $filters = [
+            'counselor_id' => $counselor['id'],
+            'search' => $_GET['search'] ?? '',
+            'category' => $_GET['category'] ?? '',
+            'status' => $_GET['status'] ?? 'pending',
+            'limit' => 20,
+            'offset' => max(0, ((int)($_GET['page'] ?? 1) - 1) * 20),
+        ];
+
+        $documents = $this->documentModel->getReviewQueue($filters);
+        $total = $this->documentModel->count($filters);
+        $stats = $this->documentModel->getStats($counselor['id']);
+
+        $selectedDoc = null;
+        if (!empty($_GET['doc_id'])) {
+            $selectedDoc = $this->documentModel->getById($_GET['doc_id']);
+        }
+
+        $this->view('counselor/review-queue', [
+            'pageTitle' => 'Document Review Queue',
+            'pageDescription' => 'Review and process student documents.',
+            'currentPage' => 'documents',
+            'documents' => $documents,
+            'total' => $total,
+            'stats' => $stats,
+            'filters' => $filters,
+            'selectedDoc' => $selectedDoc,
+        ]);
+    }
+
     public function assignCreate() {
         $counselor = $this->currentCounselor();
         if (!$counselor) {
@@ -183,8 +265,21 @@ class CounselorController extends Controller {
 
         $data = $this->sanitize($this->getInput());
 
-        if (empty($data['student_id']) || empty($data['name']) || !in_array($data['category'], ['education', 'visa'], true)) {
-            flash('error', 'Please select a student, a document name, and a category.');
+        $errors = [];
+        if (empty($data['student_id'])) {
+            $errors['student_id'] = 'Please select a student.';
+        }
+        if (empty($data['name'])) {
+            $errors['name'] = 'Document name is required.';
+        }
+        $allowedCategories = ['education', 'visa'];
+        if (empty($data['category']) || !in_array($data['category'], $allowedCategories, true)) {
+            $errors['category'] = 'Please select a valid category.';
+        }
+
+        if ($errors) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['error'] = 'Please correct the highlighted fields.';
             $this->redirect(url('/counselor/documents/assign'));
         }
 
@@ -194,6 +289,11 @@ class CounselorController extends Controller {
             'category' => $data['category'],
             'assigned_by' => $_SESSION['user_id'] ?? null,
         ]);
+
+        $student = $this->studentModel->getById($data['student_id']);
+        if ($student) {
+            createNotificationByEmail($student['email'], 'Document Required', 'You have been required to submit: ' . e($data['name']) . '.', '/student/documents');
+        }
 
         flash('success', 'Required document assigned to the student.');
         $this->redirect(url('/counselor/documents'));
@@ -328,6 +428,65 @@ class CounselorController extends Controller {
         $this->redirect(url('/counselor/profile'));
     }
 
+    public function uploadAvatar() {
+        if (!$this->isPost()) {
+            $this->redirect(url('/counselor/profile'));
+        }
+
+        $counselor = $this->currentCounselor();
+        if (!$counselor) {
+            $this->redirect(url('/counselor/profile'));
+        }
+
+        if (!isset($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+            flash('error', 'Please choose an image to upload.');
+            $this->redirect(url('/counselor/profile'));
+        }
+
+        $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $ext = strtolower(pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowedTypes, true)) {
+            flash('error', 'Only JPG, PNG, GIF, and WebP images are allowed.');
+            $this->redirect(url('/counselor/profile'));
+        }
+
+        if ($_FILES['avatar']['size'] > 5 * 1024 * 1024) {
+            flash('error', 'Image is too large. Maximum size is 5 MB.');
+            $this->redirect(url('/counselor/profile'));
+        }
+
+        $uploadDir = BASE_PATH . '/uploads/profiles/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        if (!empty($counselor['avatar'])) {
+            $oldPath = BASE_PATH . $counselor['avatar'];
+            if (file_exists($oldPath)) {
+                unlink($oldPath);
+            }
+        }
+
+        $fileName = 'avatar_counselor_' . $counselor['id'] . '_' . time() . '.' . $ext;
+        $filePath = $uploadDir . $fileName;
+
+        if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $filePath)) {
+            flash('error', 'Failed to upload image. Please try again.');
+            $this->redirect(url('/counselor/profile'));
+        }
+
+        $avatarUrl = '/uploads/profiles/' . $fileName;
+        $this->counselorModel->update($counselor['id'], ['avatar' => $avatarUrl]);
+
+        $db = getDB();
+        $stmt = $db->prepare("UPDATE users SET avatar = ? WHERE email = ?");
+        $stmt->execute([$avatarUrl, $counselor['email']]);
+        $_SESSION['user']['avatar'] = $avatarUrl;
+
+        flash('success', 'Profile picture updated successfully.');
+        $this->redirect(url('/counselor/profile'));
+    }
+
     public function students() {
         $counselor = $this->currentCounselor();
         $students = $counselor ? $this->studentModel->getAll(['counselor_id' => $counselor['id']]) : [];
@@ -399,8 +558,24 @@ class CounselorController extends Controller {
 
         $data = $this->sanitize($this->getInput());
 
-        if (empty($data['student_id']) || empty($data['datetime']) || !in_array($data['mode'] ?? '', ['In-Person', 'Video Call'], true)) {
-            flash('error', 'Please select a student, mode, and date & time.');
+        $errors = [];
+        if (empty($data['student_id'])) {
+            $errors['student_id'] = 'Student is required.';
+        }
+        if (empty($data['datetime'])) {
+            $errors['datetime'] = 'Date & Time is required.';
+        }
+        if (!in_array($data['mode'] ?? '', ['In-Person', 'Video Call'], true)) {
+            $errors['mode'] = 'Please select a valid session mode.';
+        }
+        if (empty($data['subject'])) {
+            $errors['subject'] = 'Subject / Purpose is required.';
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['old'] = $data;
+            flash('error', 'Please fix the errors below.');
             $this->redirect(url('/counselor/sessions/create'));
         }
 
@@ -418,6 +593,8 @@ class CounselorController extends Controller {
             'datetime' => $data['datetime'],
             'status' => 'scheduled',
         ]);
+
+        createNotificationByEmail($student['email'], 'New Session Scheduled', 'Your counselor has scheduled a session for you on ' . date('M d, Y g:i A', strtotime($data['datetime'])) . '.', '/student/sessions');
 
         flash('success', 'Session scheduled successfully.');
         $this->redirect(url('/counselor/sessions'));
@@ -439,13 +616,28 @@ class CounselorController extends Controller {
             $this->redirect(url('/counselor/sessions'));
         }
 
-        $status = $_POST['status'] ?? '';
+        $input = $_POST;
+        $status = $input['status'] ?? '';
+
+        $errors = [];
         if (!in_array($status, ['scheduled', 'in-progress', 'completed', 'cancelled'], true)) {
-            flash('error', 'Invalid session status.');
+            $errors['status'] = 'Invalid session status. Please select a valid status.';
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['old'] = $input;
+            flash('error', 'Please fix the errors below.');
             $this->redirect(url('/counselor/sessions'));
         }
 
         $this->sessionModel->update($id, ['status' => $status]);
+
+        $student = $this->studentModel->getById($session['student_id']);
+        if ($student) {
+            createNotificationByEmail($student['email'], 'Session Status Updated', 'Your session has been marked as ' . ucfirst($status) . '.', '/student/sessions');
+        }
+
         flash('success', 'Session marked as ' . ucfirst($status) . '.');
         $this->redirect(url('/counselor/sessions'));
     }
@@ -472,15 +664,68 @@ class CounselorController extends Controller {
             $this->redirect(url('/counselor/documents'));
         }
 
-        $status = $_POST['status'] ?? '';
-        $remarks = trim($_POST['remarks'] ?? '');
+        $input = $_POST;
+        $status = $input['status'] ?? '';
+        $remarks = trim($input['remarks'] ?? '');
+
+        $errors = [];
         if (!in_array($status, ['approved', 'rejected', 'resubmit'], true)) {
-            flash('error', 'Invalid review status.');
+            $errors['status'] = 'Invalid review status. Please select approved, rejected, or resubmit.';
+        }
+        if ($status === 'resubmit' && empty($remarks)) {
+            $errors['remarks'] = 'Please provide remarks when requesting resubmission.';
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['old'] = $input;
+            flash('error', 'Please fix the errors below.');
             $this->redirect(url('/counselor/documents'));
         }
 
         $this->documentModel->review($id, $status, $remarks, $_SESSION['user_id'] ?? null);
+
+        if ($student) {
+            $statusMsg = $status === 'approved' ? 'approved' : ($status === 'rejected' ? 'rejected' : 'marked for resubmission');
+            createNotificationByEmail($student['email'], 'Document ' . ucfirst($status), 'Your document "' . e($document['name']) . '" has been ' . $statusMsg . '.', '/student/documents');
+        }
+
         flash('success', 'Document review submitted.');
         $this->redirect(url('/counselor/documents'));
+    }
+
+    public function catalog() {
+        $collegeModel = new College();
+        $courseModel = new Course();
+
+        $collegeFilters = [
+            'search' => $_GET['search'] ?? '',
+            'country' => $_GET['country'] ?? '',
+            'status' => 'active',
+            'limit' => 20,
+            'offset' => 0,
+        ];
+        $colleges = $collegeModel->getAll($collegeFilters);
+        $countries = $collegeModel->getCountries();
+
+        $courseFilters = [
+            'search' => $_GET['search'] ?? '',
+            'level' => $_GET['level'] ?? '',
+            'country' => $_GET['country'] ?? '',
+            'status' => 'active',
+            'limit' => 20,
+            'offset' => 0,
+        ];
+        $courses = $courseModel->getAll($courseFilters);
+
+        $this->view('counselor/catalog', [
+            'pageTitle' => 'College & Course Catalog',
+            'pageDescription' => 'Browse partner colleges and available courses.',
+            'currentPage' => 'catalog',
+            'colleges' => $colleges,
+            'courses' => $courses,
+            'countries' => $countries,
+            'filters' => $_GET,
+        ]);
     }
 }

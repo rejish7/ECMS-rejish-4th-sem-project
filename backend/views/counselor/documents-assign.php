@@ -18,7 +18,7 @@
         <?php echo csrf_field(); ?>
         <div class="form-group">
             <label>Student</label>
-            <select name="student_id" required>
+            <select name="student_id">
                 <option value="">Select Student</option>
                 <?php if (!empty($students)): ?>
                     <?php foreach ($students as $student): ?>
@@ -26,23 +26,27 @@
                     <?php endforeach; ?>
                 <?php endif; ?>
             </select>
+            <?php if (!empty($_SESSION['errors']['student_id'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['student_id']); ?></div><?php endif; ?>
         </div>
         <div class="form-group">
             <label>Document Name</label>
-            <input type="text" name="name" required placeholder="e.g., 10th Marksheet, Passport Copy, Bank Statement">
+            <input type="text" name="name" placeholder="e.g., 10th Marksheet, Passport Copy, Bank Statement">
+            <?php if (!empty($_SESSION['errors']['name'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['name']); ?></div><?php endif; ?>
         </div>
         <div class="form-group">
             <label>Category</label>
-            <select name="category" required>
+            <select name="category">
                 <option value="education">Education Documents</option>
                 <option value="visa">Visa Documents</option>
             </select>
+            <?php if (!empty($_SESSION['errors']['category'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['category']); ?></div><?php endif; ?>
             <div class="hint">The student will see this as a required document and submit the file from their dashboard.</div>
         </div>
         <div class="form-actions">
             <button type="submit" class="btn-primary">Assign</button>
             <a href="<?php echo url('/counselor/documents'); ?>" class="btn-secondary">Cancel</a>
         </div>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
     </form>
 </div>
 <?php $content = ob_get_clean(); include __DIR__ . '/../layouts/counselor-layout.php';

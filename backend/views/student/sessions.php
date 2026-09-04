@@ -29,12 +29,13 @@ ob_start();
 <div class="card">
     <?php if (!empty($sessions)): ?>
         <table class="table">
-            <thead><tr><th>Date &amp; Time</th><th>Mode</th><th>Counselor</th><th>Status</th></tr></thead>
+            <thead><tr><th>Date &amp; Time</th><th>Mode</th><th>Subject</th><th>Counselor</th><th>Status</th></tr></thead>
             <tbody>
                 <?php foreach ($sessions as $s): ?>
                     <tr>
                         <td><?php echo e(date('M d, Y g:i A', strtotime($s['datetime']))); ?></td>
                         <td><?php echo e($s['mode'] ?? '-'); ?></td>
+                        <td><?php echo e($s['subject'] ?? '-'); ?></td>
                         <td><?php echo e($s['counselor_name'] ?? '-'); ?></td>
                         <td><span class="badge badge--<?php echo e($s['status']); ?>"><?php echo e(ucfirst($s['status'])); ?></span></td>
                     </tr>

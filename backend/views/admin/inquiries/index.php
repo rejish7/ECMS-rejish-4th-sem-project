@@ -140,7 +140,8 @@
                                 <div class="inq-actions">
                                     <a href="<?php echo url('/admin/inquiries/' . $inq['id']); ?>" class="inq-action-btn inq-action-btn--view" title="View">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0Z" /></svg>
-                                </a>
+                                    </a>
+                                    <?php if (($inq['status'] ?? '') !== 'closed'): ?>
                                     <form method="POST" action="<?php echo url('/admin/inquiries/' . $inq['id'] . '/auto-assign'); ?>" style="display:inline;" onsubmit="return confirm('Auto-assign to least busy counselor?')">
                                         <?php echo csrf_field(); ?>
                                         <button type="submit" class="inq-action-btn inq-action-btn--auto" title="Auto-Assign">
@@ -153,6 +154,7 @@
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                         </button>
                                     </form>
+                                    <?php endif; ?>
                                     <form method="POST" action="<?php echo url('/admin/inquiries/' . $inq['id'] . '/delete'); ?>" style="display:inline;" onsubmit="return confirm('Are you sure?')">
                                         <?php echo csrf_field(); ?>
                                         <button type="submit" class="inq-action-btn inq-action-btn--delete" title="Delete">
@@ -188,12 +190,13 @@
             <div class="modal-body">
                 <p style="margin:0 0 16px;font-size:13px;color:#73777f;">Assign a counselor to inquiry <strong id="assignInquiryId"></strong></p>
                 <label for="counselor_id">Select Counselor</label>
-                <select name="counselor_id" id="counselor_id" required>
+                <select name="counselor_id" id="counselor_id">
                     <option value="">-- Choose a counselor --</option>
                     <?php foreach ($counselors as $counselor): ?>
                         <option value="<?php echo e($counselor['id']); ?>"><?php echo e($counselor['name']); ?> (<?php echo e($counselor['specialization']); ?>)</option>
                     <?php endforeach; ?>
                 </select>
+                <?php if (!empty($_SESSION['errors']['counselor_id'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['counselor_id']); ?></div><?php endif; ?>
             </div>
             <div class="modal-footer">
                 <button type="button" class="modal-btn modal-btn--cancel" onclick="closeAssignModal()">Cancel</button>

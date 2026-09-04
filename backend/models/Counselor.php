@@ -100,7 +100,7 @@ class Counselor {
         $fields = [];
         $params = [];
 
-        $allowed = ['name', 'email', 'specialization', 'max_students', 'status'];
+        $allowed = ['name', 'email', 'specialization', 'max_students', 'status', 'avatar'];
         foreach ($data as $key => $value) {
             if (in_array($key, $allowed)) {
                 $fields[] = "{$key} = ?";

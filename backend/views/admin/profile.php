@@ -21,10 +21,24 @@
 </style>
 <div class="profile-page">
     <div class="profile-header">
-        <div class="profile-avatar"><?php echo e(substr($user['name'], 0, 1)); ?></div>
+        <div class="profile-avatar-wrap" onclick="document.getElementById('avatarInput').click();" style="cursor:pointer;">
+            <?php
+            $avatarPath = $user['avatar'] ?? '';
+            $avatarSrc = !empty($avatarPath) ? e($avatarPath) : '';
+            if ($avatarSrc): ?>
+                <img src="<?php echo $avatarSrc; ?>" alt="Profile" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
+            <?php else: ?>
+                <div class="profile-avatar" id="avatarFallback"><?php echo e(substr($user['name'], 0, 1)); ?></div>
+            <?php endif; ?>
+            <div class="avatar-edit-overlay">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+        </div>
+        <input type="file" name="avatar" id="avatarInput" accept="image/*" style="display:none;" onchange="submitAvatar(this);">
         <div class="profile-header-text">
             <h2><?php echo e($user['name']); ?></h2>
             <p><?php echo e($user['role'] ?? 'admin'); ?></p>
+            <p style="font-size:12px;color:#9ca3af;margin-top:4px;">Click image to change photo</p>
         </div>
     </div>
     <div class="profile-card">
@@ -40,7 +54,8 @@
             <?php echo csrf_field(); ?>
             <div class="form-group">
                 <label>Current Password</label>
-                <input type="password" name="current_password" minlength="8" required>
+                <input type="password" name="current_password" minlength="8">
+                <?php if (!empty($_SESSION['errors']['current_password'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['current_password']); ?></div><?php endif; ?>
             </div>
             <div class="form-group">
                 <label>New Password</label>
@@ -53,9 +68,32 @@
             <div class="form-actions">
                 <button type="submit" class="btn-primary" onclick="if(this.form.password.value !== this.form.password_confirm.value){alert('Passwords do not match');return false;}">Update Password</button>
             </div>
+            <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
         </form>
     </div>
 </div>
 <?php
 $content = ob_get_clean();
 include __DIR__ . '/../layouts/admin-layout.php';
+?>
+<script>
+function submitAvatar(input) {
+    if (input.files && input.files[0]) {
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '<?php echo url("/admin/profile/avatar"); ?>';
+        form.enctype = 'multipart/form-data';
+        var csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = 'csrf_token';
+        csrf.value = '<?php echo e(csrf_token()); ?>';
+        form.appendChild(csrf);
+        var dt = new DataTransfer();
+        dt.items.add(input.files[0]);
+        input.files = dt.files;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>

@@ -172,6 +172,38 @@ function changeUserPassword($userId, $current, $new) {
     return ['ok' => true];
 }
 
+function createNotification($userId, $title, $message, $link = null) {
+    require_once MODEL_PATH . '/Notification.php';
+    $model = new Notification();
+    return $model->create([
+        'user_id' => $userId,
+        'title' => $title,
+        'message' => $message,
+        'link' => $link,
+    ]);
+}
+
+function createNotificationByEmail($email, $title, $message, $link = null) {
+    require_once MODEL_PATH . '/Notification.php';
+    $model = new Notification();
+    $userId = $model->findUserIdByEmail($email);
+    if ($userId) {
+        return $model->create([
+            'user_id' => $userId,
+            'title' => $title,
+            'message' => $message,
+            'link' => $link,
+        ]);
+    }
+    return false;
+}
+
+function getUnreadNotificationCount($userId) {
+    require_once MODEL_PATH . '/Notification.php';
+    $model = new Notification();
+    return $model->getUnreadCount($userId);
+}
+
 function buildAccountEmailBody($roleLabel, $name, $email, $password) {
     $loginUrl = url('/login');
     return '<html><body style="font-family:Arial,Helvetica,sans-serif;color:#0b1c30;">'

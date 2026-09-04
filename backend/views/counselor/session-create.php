@@ -17,11 +17,11 @@ ob_start();
 </style>
 <div class="form-card">
     <h3>Schedule New Session</h3>
-    <form method="POST" action="<?php echo url('/counselor/sessions/store'); ?>">
+    <form method="POST" action="<?php echo url('/counselor/sessions/store'); ?>" id="sessionForm">
         <?php echo csrf_field(); ?>
         <div class="form-group">
             <label>Student</label>
-            <select name="student_id" required>
+            <select name="student_id">
                 <option value="">Select student</option>
                 <?php if (!empty($students)): ?>
                     <?php foreach ($students as $st): ?>
@@ -29,22 +29,56 @@ ob_start();
                     <?php endforeach; ?>
                 <?php endif; ?>
             </select>
+            <?php if (!empty($_SESSION['errors']['student_id'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['student_id']); ?></div><?php endif; ?>
         </div>
         <div class="form-group">
             <label>Mode</label>
-            <select name="mode" required>
+            <select name="mode">
                 <option value="In-Person">In-Person</option>
                 <option value="Video Call">Video Call</option>
             </select>
+            <?php if (!empty($_SESSION['errors']['mode'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['mode']); ?></div><?php endif; ?>
         </div>
         <div class="form-group">
-            <label>Date &amp; Time</label>
-            <input type="datetime-local" name="datetime" required>
+            <label>Subject / Purpose</label>
+            <input type="text" name="subject" value="<?php echo e($_SESSION['old']['subject'] ?? ''); ?>" placeholder="e.g. Initial consultation, Follow-up, Document review...">
+            <?php if (!empty($_SESSION['errors']['subject'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['subject']); ?></div><?php endif; ?>
+        </div>
+        <div class="form-group">
+            <label>Select Date</label>
+            <?php include VIEW_PATH . '/partials/calendar-widget.php'; ?>
+        </div>
+        <div class="form-group">
+            <label>Time</label>
+            <input type="time" name="time" id="sessionTime">
+            <?php if (!empty($_SESSION['errors']['time'])): ?><div class="form-error"><?php echo e($_SESSION['errors']['time']); ?></div><?php endif; ?>
         </div>
         <div class="form-actions">
             <button type="submit" class="btn-primary">Schedule</button>
             <a href="<?php echo url('/counselor/sessions'); ?>" class="btn-secondary">Cancel</a>
         </div>
+        <?php unset($_SESSION['errors'], $_SESSION['old']); ?>
     </form>
 </div>
+<script>
+document.getElementById('sessionForm').addEventListener('submit', function(e) {
+    var dateVal = document.getElementById('calendarWidget_value').value;
+    var timeVal = document.getElementById('sessionTime').value;
+    if (!dateVal) {
+        e.preventDefault();
+        alert('Please select a date from the calendar.');
+        return false;
+    }
+    if (!timeVal) {
+        e.preventDefault();
+        alert('Please select a time.');
+        return false;
+    }
+    var hiddatetime = document.createElement('input');
+    hiddatetime.type = 'hidden';
+    hiddatetime.name = 'datetime';
+    hiddatetime.value = dateVal + ' ' + timeVal + ':00';
+    this.appendChild(hiddatetime);
+});
+</script>
 <?php $content = ob_get_clean(); include __DIR__ . '/../layouts/counselor-layout.php';
